@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { ChartConfig, ExtendedBarConfig } from '../types';
+import { renderChart } from '../utils/chartRendererNode';
 
 // Кэш для изображений
 const imageCache = new Map<string, HTMLImageElement>();
@@ -37,15 +38,31 @@ interface ChartPreviewProps {
     name?: string;
   } | null;
   interval?: string;
+  width?: number;
+  height?: number;
   id?: string;
   tokenName?: string;
 }
 
-const ChartPreview: React.FC<ChartPreviewProps> = ({ config, data, tokenInfo, interval, id = 'chart-canvas', tokenName }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+/**
+ * Компонент для отображения графика криптовалюты
+ */
+const ChartPreview: React.FC<ChartPreviewProps> = ({
+  config,
+  data,
+  tokenInfo,
+  interval = 'hour',
+  width = 1280,
+  height = 1280,
+  id = 'chart-canvas',
+  tokenName
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const bufferCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number>();
   const isDrawingRef = useRef(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Мемоизируем функции для предотвращения ненужных перерисовок
   const priceToY = useCallback((price: number | string, height: number, minPrice: number, priceRange: number, topMargin: number, bottomMargin: number) => {
@@ -355,12 +372,19 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({ config, data, tokenInfo, in
           })
         : ['24h ago', '16h ago', '10h ago', '6h ago', 'Now'];
 
-      const labelPositions = Array.from({ length: timeLabels.length }, (_, i) =>
-        leftMargin + i * (bufferCanvas.width - leftMargin - rightMargin) / (timeLabels.length - 1)
-      );
+      const labelPositions = Array.from({ length: timeLabels.length }, (_, i) => {
+        // Добавляем отступ для первой и последней метки, чтобы они не выходили за границы
+        if (i === 0) {
+          return leftMargin + 10; // Добавляем отступ для первой метки
+        } else if (i === timeLabels.length - 1) {
+          return bufferCanvas.width - rightMargin - 10; // Добавляем отступ для последней метки
+        } else {
+          return leftMargin + i * (bufferCanvas.width - leftMargin - rightMargin) / (timeLabels.length - 1);
+        }
+      });
 
       // Отрисовка MC и Price
-      bufferCtx.font = `${Math.round(config.font.size * 1.2)}px ${config.font.family}`;
+      bufferCtx.font = `${config.font.size}px ${config.font.family}`;
       bufferCtx.fillStyle = config.font.color;
       bufferCtx.textBaseline = 'top';
 
@@ -426,6 +450,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({ config, data, tokenInfo, in
           ? `Price: $${tokenInfo.priceUsd.toFixed(8)}`
           : `Price: $${parseFloat(data[data.length - 1][4]).toFixed(8)}`;
         const priceWidth = bufferCtx.measureText(priceText).width;
+        // Размещаем текст справа вверху
         bufferCtx.fillText(priceText, bufferCanvas.width - (rightMargin / 2) - priceWidth, topOffset);
 
         // Отрисовка Min/Max если включено
@@ -434,8 +459,10 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({ config, data, tokenInfo, in
           const maxPrice = Math.max(...data.map(item => parseFloat(item[2])));
           const minMaxText = `Min/max: $${minPrice.toFixed(6)} / $${maxPrice.toFixed(7)}`;
           bufferCtx.font = `${config.font.size * 0.8}px ${config.font.family}`;
-          bufferCtx.fillText(minMaxText, bufferCanvas.width - (rightMargin / 2) - bufferCtx.measureText(minMaxText).width, topOffset + config.font.size * 1.2);
-          bufferCtx.font = `${config.font.size * 1.2}px ${config.font.family}`; // Восстанавливаем исходный размер шрифта
+          // Размещаем текст Min/Max под текстом Price
+          const minMaxWidth = bufferCtx.measureText(minMaxText).width;
+          bufferCtx.fillText(minMaxText, bufferCanvas.width - (rightMargin / 2) - minMaxWidth, topOffset + config.font.size * 1.2);
+          bufferCtx.font = `${config.font.size}px ${config.font.family}`; // Восстанавливаем исходный размер шрифта
         }
       }
 
@@ -452,7 +479,31 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({ config, data, tokenInfo, in
           const yPosition = config.display.showPriceChange 
             ? bufferCanvas.height - bottomMargin + 50  // Если Price Change активен, рисуем над линией
             : bufferCanvas.height - bottomMargin + 110; // Если Price Change неактивен, рисуем внизу
-          bufferCtx.fillText(label, labelPositions[i] - textWidth / 2, yPosition);
+          
+          // Рассчитываем позицию X с учетом выхода за границы
+          let xPosition = labelPositions[i] - textWidth / 2;
+          
+          // Проверяем, не выходит ли текст за левую границу
+          if (xPosition < leftMargin / 2) {
+            xPosition = leftMargin / 2;
+          }
+          
+          // Проверяем, не выходит ли текст за правую границу
+          if (xPosition + textWidth > bufferCanvas.width - rightMargin / 2) {
+            xPosition = bufferCanvas.width - rightMargin / 2 - textWidth;
+          }
+          
+          // Добавляем усиленную тень для лучшей читаемости
+          bufferCtx.save();
+          bufferCtx.shadowColor = 'black';
+          bufferCtx.shadowBlur = 6;
+          bufferCtx.shadowOffsetX = 2;
+          bufferCtx.shadowOffsetY = 2;
+          
+          // Сам текст временных меток
+          bufferCtx.fillStyle = config.font.color;
+          bufferCtx.fillText(label, xPosition, yPosition);
+          bufferCtx.restore();
         });
       }
 
@@ -466,17 +517,40 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({ config, data, tokenInfo, in
         bufferCtx.stroke();
       }
 
-      // Отрисовка изменений цены
+      // Отрисовка изменений цены - делаем это в последнюю очередь, чтобы оно всегда было поверх всего
       if (config.display.showPriceChange) {
         const changeWidth = (bufferCanvas.width - leftMargin / 2 - rightMargin / 2) / changes.length;
         
+        // Отрисовка текста price change с тенями вместо фона
         changes.forEach((change, i) => {
           const x = leftMargin / 2 + i * changeWidth + changeWidth / 2;
           const text = `${change.period}: ${change.value >= 0 ? '+' : ''}${change.value.toFixed(2)}%`;
-          
-          bufferCtx.fillStyle = change.value > 0 ? config.upBar.color : change.value < 0 ? config.downBar.color : 'yellow';
           const textWidth = bufferCtx.measureText(text).width;
-          bufferCtx.fillText(text, x - textWidth / 2, bufferCanvas.height - bottomMargin + 110);
+          
+          // Рассчитываем позицию X с учетом выхода за границы
+          let xPosition = x - textWidth / 2;
+          
+          // Проверяем, не выходит ли текст за левую границу
+          if (xPosition < leftMargin / 2) {
+            xPosition = leftMargin / 2;
+          }
+          
+          // Проверяем, не выходит ли текст за правую границу
+          if (xPosition + textWidth > bufferCanvas.width - rightMargin / 2) {
+            xPosition = bufferCanvas.width - rightMargin / 2 - textWidth;
+          }
+          
+          // Добавляем усиленную тень для лучшей читаемости
+          bufferCtx.save();
+          bufferCtx.shadowColor = 'black';
+          bufferCtx.shadowBlur = 6;
+          bufferCtx.shadowOffsetX = 2;
+          bufferCtx.shadowOffsetY = 2;
+          
+          // Отрисовываем текст изменения цены
+          bufferCtx.fillStyle = change.value > 0 ? config.upBar.color : change.value < 0 ? config.downBar.color : 'yellow';
+          bufferCtx.fillText(text, xPosition, bufferCanvas.height - bottomMargin + 110);
+          bufferCtx.restore();
         });
       }
 
@@ -497,18 +571,44 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({ config, data, tokenInfo, in
     animationFrameRef.current = requestAnimationFrame(drawChart);
   }, [drawChart]);
 
+  useEffect(() => {
+    // Если нет данных, не рисуем график
+    if (!data || data.length === 0) {
+      setIsLoading(false);
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Вызываем отрисовку через requestAnimationFrame
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    animationFrameRef.current = requestAnimationFrame(() => {
+      drawChart().then(() => {
+        setIsLoading(false);
+      }).catch(err => {
+        console.error('Error rendering chart:', err);
+        setError(err instanceof Error ? err.message : 'Error rendering chart');
+        setIsLoading(false);
+      });
+    });
+    
+  }, [config, data, tokenInfo, interval, width, height, drawChart]);
+
   return (
     <Box className="chart-preview">
+      {isLoading && <div className="loading">Загрузка графика...</div>}
+      {error && <div className="error">Ошибка: {error}</div>}
       <canvas
         ref={canvasRef}
         id={id}
-        width={1280}
-        height={1280}
-        style={{
-          width: '100%',
-          height: '100%',
-          border: '1px solid #ccc',
-          backgroundColor: config.background.color || '#000000'
+        width={width}
+        height={height}
+        style={{ 
+          display: isLoading ? 'none' : 'block',
+          maxWidth: '100%',
+          height: 'auto'
         }}
       />
       {tokenInfo && (
