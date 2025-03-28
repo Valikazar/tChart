@@ -1,0 +1,65 @@
+/* Объявляем шрифты из каталога fonts */
+@font-face {
+  font-family: 'Rich Eatin';
+  src: url('../fonts/Rich Eatin\'.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Computer Speak';
+  src: url('../fonts/Computer Speak v0.3.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Idealist Sans';
+  src: url('../fonts/idealist-sans.light.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Komi';
+  src: url('../fonts/Komi.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Blogger Sans';
+  src: url('../fonts/Blogger Sans.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Crystal';
+  src: url('../fonts/CRYSTAL-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'GetVoIP Grotesque';
+  src: url('../fonts/GetVoIP Grotesque.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Robotech GP';
+  src: url('../fonts/ROBOTECH GP.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Anita Semi Square';
+  src: url('../fonts/Anita semi square.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Garoa Hacker';
+  src: url('../fonts/GaroaHackerClubeBold.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Extra';
+  src: url('../fonts/extrast9.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Anarchy Sans';
+  src: url('../fonts/AnarchySans.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Keenton';
+  src: url('../fonts/Keenton.ttf') format('truetype');
+} 

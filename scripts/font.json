@@ -1,0 +1,72 @@
+{
+  "background": {
+    "color": "#000000",
+    "opacity": 0.5,
+    "image": {
+      "url": "",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    }
+  },
+  "overlay": {
+    "color": "#000000"
+  },
+  "font": {
+    "family": "Arial",
+    "size": 40,
+    "color": "#ffffff"
+  },
+  "text": {
+    "content": "",
+    "x": 0,
+    "y": 0,
+    "color": "#000000",
+    "size": 14,
+    "family": "Arial",
+    "align": "left",
+    "baseline": "top"
+  },
+  "display": {
+    "showMarketCap": true,
+    "showPrice": true,
+    "showTimeline": true,
+    "showPriceChange": true,
+    "showTokenName": true,
+    "showMinMax": true
+  },
+  "upBar": {
+    "color": "#26a69a",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "downBar": {
+    "color": "#ef5350",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "candle": {
+    "color": "#00ff00",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "knife": {
+    "color": "#FF0700",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "network": "polygon_pos",
+  "poolAddress": "0xa030be97a53d6462c675962fec3eafbe53b8bb6c",
+  "duration": 24,
+  "numBars": 20,
+  "interval": "hour",
+  "fontBinary": "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9InJ1Ij4KICA8aGVhZD4KICAgIDxtZXRhIGNoYXJzZXQ9InV0Zi04IiAvPgogICAgPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xIiAvPgogICAgPG1ldGEgbmFtZT0idGhlbWUtY29sb3IiIGNvbnRlbnQ9IiMwMDAwMDAiIC8+CiAgICA8dGl0bGU+dENoYXJ0IENvbnN0cnVjdG9yPC90aXRsZT4KICA8c2NyaXB0IGRlZmVyIHNyYz0iL3N0YXRpYy9qcy9idW5kbGUuanMiPjwvc2NyaXB0PjwvaGVhZD4KICA8Ym9keT4KICAgIDxub3NjcmlwdD5Zb3UgbmVlZCB0byBlbmFibGUgSmF2YVNjcmlwdCB0byBydW4gdGhpcyBhcHAuPC9ub3NjcmlwdD4KICAgIDxkaXYgaWQ9InJvb3QiPjwvZGl2PgogIDwvYm9keT4KPC9odG1sPg=="
+}
