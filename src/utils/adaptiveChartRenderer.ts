@@ -1,5 +1,5 @@
 import { ChartConfig } from '../types';
-import { renderChart } from './chartRendererNode';
+import { renderChart } from './chartRendererUniversal';
 
 interface AdaptiveChartOptions {
   config: ChartConfig;

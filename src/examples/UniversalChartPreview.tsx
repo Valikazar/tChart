@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChartConfig } from '../types';
-import { renderChart } from '../utils/chartRendererNode';
+import { renderChart } from '../utils/chartRendererUniversal';
 
 interface ChartPreviewProps {
   config: ChartConfig;

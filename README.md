@@ -147,7 +147,7 @@ generateChartImage({
 You can also use the base renderChart function directly:
 
 ```typescript
-import { renderChart } from './utils/chartRendererNode';
+import { renderChart } from './utils/chartRendererUniversal';
 
 // ...
 
@@ -268,7 +268,8 @@ Example structure of configuration:
 
 ## Notes
 
-1. For Node.js mode, you need to have skia-canvas installed
-2. In browser, the function uses standard HTML5 Canvas API
-3. You can pass an existing canvas or get a new one for embedding in DOM
-4. On Windows, you may need to install additional dependencies for skia-canvas 
+1. Both in Node.js and browser environments skia-canvas is used for rendering
+2. In browser mode, a polyfill implementation of skia-canvas is provided automatically
+3. You should include the skia-canvas-browser.js script before your application code
+4. The same API works in both environments - no need to change your code between Node.js and browser
+5. On Windows, you may need to install additional dependencies for skia-canvas 

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { ChartConfig, ExtendedBarConfig } from '../types';
-import { renderChart } from '../utils/chartRendererNode';
+import { renderChart } from '../utils/chartRendererUniversal';
 
 // Кэш для изображений
 const imageCache = new Map<string, HTMLImageElement>();

@@ -1,5 +1,5 @@
 import { ChartConfig } from '../types';
-import { renderChart } from './chartRendererNode';
+import { renderChart } from './chartRendererUniversal';
 import * as fs from 'fs';
 import * as path from 'path';
 
