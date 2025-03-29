@@ -1,43 +1,43 @@
 # Chart Constructor
 
-Инструмент для создания и настройки графиков криптовалют.
+Tool for creating and configuring cryptocurrency charts.
 
-## Новая функциональность: Универсальная генерация графиков
+## New Functionality: Universal Chart Generation
 
-Теперь вы можете генерировать графики как в браузере, так и в Node.js без браузера, с помощью единой универсальной функции. Стандартный размер графиков - квадратный 1280x1280.
+You can now generate charts both in the browser and in Node.js without a browser, using a single universal function. The standard chart size is a square 1280x1280.
 
-## Новое: Адаптивные графики
+## New: Adaptive Charts
 
-Библиотека теперь поддерживает адаптивные графики, которые автоматически подстраиваются под размер контейнера, что значительно улучшает отображение на различных устройствах и разрешениях экрана. Адаптивные графики предотвращают перекрытие с другими элементами UI (например, аккордеонами).
+The library now supports adaptive charts that automatically adjust to their container size, which significantly improves display across various devices and screen resolutions. Adaptive charts prevent overlapping with other UI elements (like accordions).
 
-### Улучшенное отображение информации
+### Improved Information Display
 
-* Текущая цена и min/max цены теперь отображаются в правом верхнем углу графика для лучшей видимости
-* Все текстовые элементы (временные метки, изменения цены) имеют усиленные тени вместо полупрозрачных фонов, что значительно улучшает их читаемость при использовании фоновых изображений
-* Изменения цены (price change) всегда отображаются поверх других элементов графика, что предотвращает их перекрытие фоновыми изображениями и оверлеями
+* The current price and min/max prices are now displayed in the top right corner of the chart for better visibility
+* All text elements (timeline labels, price changes) have enhanced shadows instead of semi-transparent backgrounds, which significantly improves their readability when using background images
+* Price changes are always displayed on top of other chart elements, preventing them from being obscured by background images and overlays
 
-### Использование компонента AdaptiveChartContainer
+### Using the AdaptiveChartContainer Component
 
 ```tsx
 import AdaptiveChartContainer from './components/AdaptiveChartContainer';
 
-// В вашем компоненте:
+// In your component:
 <AdaptiveChartContainer
   config={config}
   data={data}
   tokenInfo={tokenInfo}
-  preserveAspectRatio={true} // Сохранять ли соотношение сторон 1:1
-  minHeight={400} // Минимальная высота контейнера
-  showDownloadButton={true} // Показывать ли кнопку скачивания
+  preserveAspectRatio={true} // Whether to maintain a 1:1 aspect ratio
+  minHeight={400} // Minimum container height
+  showDownloadButton={true} // Show download button
 />
 ```
 
-Также доступны низкоуровневые функции для более гибкой настройки:
+Low-level functions are also available for more flexible configuration:
 
 ```tsx
 import { renderAdaptiveChart, setupResizeObserver } from './utils/adaptiveChartRenderer';
 
-// В вашем компоненте с useRef и useEffect:
+// In your component with useRef and useEffect:
 const containerRef = useRef<HTMLDivElement>(null);
 
 useEffect(() => {
@@ -53,151 +53,151 @@ useEffect(() => {
     
     renderChart();
     
-    // Автоматическое обновление при изменении размера
+    // Automatic update when size changes
     const cleanup = setupResizeObserver(containerRef.current, renderChart);
     return cleanup;
   }
 }, [data, config]);
 
-// В JSX:
+// In JSX:
 <div ref={containerRef} style={{ width: '100%', minHeight: '400px' }}></div>
 ```
 
-### Установка
+### Installation
 
 ```bash
-# Устанавливаем зависимости
+# Install dependencies
 npm install
 
-# Устанавливаем skia-canvas (для режима без браузера)
+# Install skia-canvas (for Node.js mode without browser)
 npm install skia-canvas
 ```
 
-### Пример использования в коде
+### Code Usage Examples
 
-#### Режим без браузера (Node.js)
+#### Node.js Mode (No Browser)
 
 ```typescript
 import { generateChartImage } from './utils/generateChartImage';
 import defaultConfig from './config/defaultChartConfig';
 
-// Данные OHLCV
+// OHLCV data
 const data = [
   [1617235200, 100, 120, 90, 110, 1000], // [timestamp, open, high, low, close, volume]
   [1617321600, 110, 130, 100, 120, 1200],
   // ...
 ];
 
-// Генерация и сохранение графика
+// Generate and save chart
 generateChartImage({
   config: defaultConfig,
   data,
   outputPath: 'output/chart.png'
 })
 .then(result => {
-  console.log('График сохранен:', result.filePath);
-  console.log('Base64 строка:', result.base64);
+  console.log('Chart saved:', result.filePath);
+  console.log('Base64 string:', result.base64);
 })
 .catch(error => {
-  console.error('Ошибка:', error);
+  console.error('Error:', error);
 });
 ```
 
-#### Режим браузера
+#### Browser Mode
 
 ```typescript
 import { generateChartImage } from './utils/generateChartImage';
 import defaultConfig from './config/defaultChartConfig';
 
-// Данные OHLCV
+// OHLCV data
 const data = [
   [1617235200, 100, 120, 90, 110, 1000],
   [1617321600, 110, 130, 100, 120, 1200],
   // ...
 ];
 
-// Использование существующего canvas
+// Use existing canvas
 const canvas = document.getElementById('my-chart-canvas') as HTMLCanvasElement;
 
-// Устанавливаем размеры canvas (стандарт 1280x1280)
+// Set canvas dimensions (standard is 1280x1280)
 canvas.width = 1280;
 canvas.height = 1280;
 
-// Генерация графика в браузере
+// Generate chart in browser
 generateChartImage({
   config: defaultConfig,
   data,
   canvas,
-  // width и height можно не указывать - по умолчанию 1280x1280
+  // width and height are optional - default is 1280x1280
 })
 .then(result => {
-  // Canvas уже содержит нарисованный график
-  // Также можно использовать base64 для создания изображения
+  // Canvas already contains the rendered chart
+  // You can also use base64 to create an image
   const img = document.createElement('img');
   img.src = result.base64;
   document.body.appendChild(img);
 })
 .catch(error => {
-  console.error('Ошибка:', error);
+  console.error('Error:', error);
 });
 ```
 
-### Прямое использование функции renderChart
+### Direct Usage of renderChart Function
 
-Вы также можете использовать базовую функцию renderChart напрямую:
+You can also use the base renderChart function directly:
 
 ```typescript
 import { renderChart } from './utils/chartRendererNode';
 
 // ...
 
-// Получаем или создаем элемент canvas
+// Get or create canvas element
 const canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
 canvas.width = 1280;
 canvas.height = 1280;
 
-// Вызываем функцию рендеринга
+// Call the rendering function
 const result = await renderChart({
   config,
   data,
-  // width и height по умолчанию 1280x1280
-  // В браузере:
+  // width and height are 1280x1280 by default
+  // In browser:
   canvas
-  // В Node.js:
+  // In Node.js:
   // outputPath: 'path/to/save/image.png'
 });
 
-// В браузере: result.canvas и result.base64
-// В Node.js: result.buffer, result.base64
+// In browser: result.canvas and result.base64
+// In Node.js: result.buffer, result.base64
 ```
 
-### Использование CLI-утилиты
+### Using the CLI Utility
 
-В проект добавлена CLI-утилита для генерации графиков из командной строки:
+The project includes a CLI utility for generating charts from the command line:
 
 ```bash
-# Запуск через npm script
+# Run via npm script
 npm run generate-chart -- --config examples/config.json --data examples/data.json --output output/chart.png
 
-# Или напрямую через ts-node
+# Or directly via ts-node
 npx ts-node src/cli/generateChart.ts --config examples/config.json --data examples/data.json --output output/chart.png
 ```
 
-### Параметры CLI
+### CLI Parameters
 
 ```
---config <путь>   Путь к JSON-файлу с конфигурацией графика
---data <путь>     Путь к JSON-файлу с данными OHLCV
---output <путь>   Путь для сохранения изображения (по умолчанию: chart.png)
---width <число>   Ширина графика в пикселях (по умолчанию: 1280)
---height <число>  Высота графика в пикселях (по умолчанию: 1280)
---interval <тип>  Интервал для временных отметок (hour, day) (по умолчанию: hour)
---help, -h        Показать справку
+--config <path>   Path to JSON file with chart configuration
+--data <path>     Path to JSON file with OHLCV data
+--output <path>   Path to save the image (default: chart.png)
+--width <number>  Chart width in pixels (default: 1280)
+--height <number> Chart height in pixels (default: 1280)
+--interval <type> Interval for time labels (hour, day) (default: hour)
+--help, -h        Show help
 ```
 
-### Формат данных
+### Data Format
 
-Данные должны быть в формате OHLCV:
+Data must be in OHLCV format:
 
 ```json
 [
@@ -206,7 +206,7 @@ npx ts-node src/cli/generateChart.ts --config examples/config.json --data exampl
 ]
 ```
 
-Или в формате объектов:
+Or in object format:
 
 ```json
 [
@@ -222,9 +222,9 @@ npx ts-node src/cli/generateChart.ts --config examples/config.json --data exampl
 ]
 ```
 
-### Формат конфигурации
+### Format of Configuration
 
-Пример структуры конфигурации:
+Example structure of configuration:
 
 ```json
 {
@@ -266,9 +266,9 @@ npx ts-node src/cli/generateChart.ts --config examples/config.json --data exampl
 }
 ```
 
-## Примечания
+## Notes
 
-1. Для работы в режиме Node.js требуется установленная библиотека skia-canvas
-2. В браузере функция использует стандартный HTML5 Canvas API
-3. Можно передать существующий canvas или получить новый для встраивания в DOM
-4. На Windows может потребоваться установить дополнительные зависимости для работы skia-canvas 
+1. For Node.js mode, you need to have skia-canvas installed
+2. In browser, the function uses standard HTML5 Canvas API
+3. You can pass an existing canvas or get a new one for embedding in DOM
+4. On Windows, you may need to install additional dependencies for skia-canvas 

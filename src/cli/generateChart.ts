@@ -39,8 +39,8 @@ for (let i = 0; i < args.length; i++) {
 
 // Проверка обязательных аргументов
 if (!options.config || !options.data) {
-  console.error('Ошибка: не указаны обязательные параметры --config и --data');
-  showHelp();
+  console.error('Error: required parameters --config and --data are missing');
+  console.log('Usage: node generateChart.js --config <path_to_config> --data <path_to_data> [--output <output_path>]');
   process.exit(1);
 }
 
@@ -108,7 +108,7 @@ async function main() {
 
     console.log(`\nГрафик успешно сгенерирован и сохранен в: ${result.filePath}`);
   } catch (error) {
-    console.error('Произошла ошибка:', error);
+    console.error('An error occurred:', error);
     process.exit(1);
   }
 }

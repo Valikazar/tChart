@@ -33,10 +33,12 @@ export async function renderAdaptiveChart(options: AdaptiveChartOptions) {
     onRenderComplete
   } = options;
 
-  // Создаем canvas и добавляем его в контейнер
-  const canvas = document.createElement('canvas');
-  container.innerHTML = ''; // Очищаем контейнер
-  container.appendChild(canvas);
+  // Keep existing canvas if it exists to prevent flicker
+  let canvas = container.querySelector('canvas');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    container.appendChild(canvas);
+  }
 
   // Устанавливаем начальные размеры
   let containerWidth = container.clientWidth;
@@ -85,7 +87,7 @@ export async function renderAdaptiveChart(options: AdaptiveChartOptions) {
 
     return result;
   } catch (error) {
-    console.error('Ошибка при рендеринге адаптивного графика:', error);
+    console.error('Error rendering adaptive chart:', error);
     throw error;
   }
 }
@@ -127,15 +129,15 @@ export function setupResizeObserver(
 }
 
 /**
- * Компонент для использования в React
- * Пример использования:
+ * Component for use in React
+ * Usage example:
  * 
  * function YourComponent() {
  *   const containerRef = useRef<HTMLDivElement>(null);
  *   
  *   useEffect(() => {
  *     if (containerRef.current && data) {
- *       // Рендерим график при первой загрузке
+ *       // Render chart on initial load
  *       const renderChart = async () => {
  *         await renderAdaptiveChart({
  *           config,
@@ -147,10 +149,10 @@ export function setupResizeObserver(
  *       
  *       renderChart();
  *       
- *       // Устанавливаем обработчик изменения размера
+ *       // Set up resize handler
  *       const cleanup = setupResizeObserver(containerRef.current, renderChart);
  *       
- *       return cleanup; // Не забываем вызвать функцию очистки при размонтировании
+ *       return cleanup; // Don't forget to call cleanup function on unmount
  *     }
  *   }, [data, config]);
  *   

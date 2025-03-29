@@ -14,8 +14,8 @@ if (isNodeEnvironment) {
     Canvas = skiaCanvas.Canvas;
     loadImageFunc = skiaCanvas.loadImage;
   } catch (e) {
-    console.error('Ошибка загрузки skia-canvas:', e);
-    console.error('Пожалуйста, установите skia-canvas: npm install skia-canvas');
+    console.error('Error loading skia-canvas:', e);
+    console.error('Please install skia-canvas: npm install skia-canvas');
   }
 } 
 
@@ -72,7 +72,7 @@ async function preloadImageNode(url: string): Promise<any> {
     // Поддержка как локальных файлов, так и URL
     return await loadImageFunc(url);
   } catch (error) {
-    console.error('Ошибка загрузки изображения:', error);
+    console.error('Error loading image:', error);
     throw error;
   }
 }

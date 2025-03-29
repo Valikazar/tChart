@@ -53,51 +53,28 @@ export async function generateChartImage({
     });
 
     return {
-      filePath: outputPath || '',
+      filePath: outputPath,
       base64: result.base64,
       canvas: result.canvas
     };
   } catch (error) {
-    console.error('Ошибка при генерации графика:', error);
+    console.error('Error generating chart:', error);
     throw error;
   }
 }
 
 /**
- * Пример использования:
+ * Usage example:
  * 
- * import { generateChartImage } from './utils/generateChartImage';
- * import defaultConfig from './config/defaultChartConfig';
- * 
- * // Данные OHLCV
- * const data = [
- *   [1617235200, 100, 120, 90, 110, 1000], // [timestamp, open, high, low, close, volume]
- *   [1617321600, 110, 130, 100, 120, 1200],
- *   // ...
- * ];
- * 
- * // Генерация и сохранение графика
  * generateChartImage({
- *   config: defaultConfig,
- *   data,
- *   outputPath: 'output/chart.png'
+ *   config: chartConfig,
+ *   data: chartData,
+ *   outputPath: './output/chart.png'
  * })
  * .then(result => {
- *   console.log('График сохранен:', result.filePath);
+ *   console.log('Chart generated:', result.filePath);
  * })
  * .catch(error => {
- *   console.error('Ошибка:', error);
- * });
- * 
- * // Использование в браузере:
- * const canvas = document.getElementById('my-canvas');
- * generateChartImage({
- *   config: defaultConfig,
- *   data,
- *   canvas: canvas
- * })
- * .then(result => {
- *   // Canvas уже обновлен
- *   console.log('База 64:', result.base64.substring(0, 50) + '...');
+ *   console.error('Error:', error);
  * });
  */ 

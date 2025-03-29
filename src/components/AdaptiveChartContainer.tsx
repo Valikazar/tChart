@@ -63,13 +63,13 @@ const AdaptiveChartContainer: React.FC<AdaptiveChartContainerProps> = ({
           if (onRenderComplete) {
             onRenderComplete(result);
           }
+          // Use a small delay to ensure the chart is fully rendered before hiding the loader
+          setTimeout(() => setIsLoading(false), 100);
         }
       });
-      
-      setIsLoading(false);
     } catch (err) {
-      console.error('Ошибка при рендеринге графика:', err);
-      setError(err instanceof Error ? err.message : 'Ошибка при рендеринге графика');
+      console.error('Error rendering chart:', err);
+      setError(err instanceof Error ? err.message : 'Error rendering chart');
       setIsLoading(false);
     }
   };
@@ -112,8 +112,9 @@ const AdaptiveChartContainer: React.FC<AdaptiveChartContainerProps> = ({
         ...style
       }}
     >
-      {isLoading && (
-        <Box sx={{ 
+      {/* Loading overlay with transition */}
+      <Box 
+        sx={{ 
           position: 'absolute', 
           top: 0, 
           left: 0, 
@@ -123,11 +124,14 @@ const AdaptiveChartContainer: React.FC<AdaptiveChartContainerProps> = ({
           alignItems: 'center', 
           justifyContent: 'center',
           backgroundColor: 'rgba(0,0,0,0.1)',
-          zIndex: 2
-        }}>
-          <CircularProgress />
-        </Box>
-      )}
+          zIndex: 2,
+          opacity: isLoading ? 1 : 0,
+          visibility: isLoading ? 'visible' : 'hidden',
+          transition: 'opacity 0.3s ease-in-out, visibility 0.3s ease-in-out',
+        }}
+      >
+        <CircularProgress />
+      </Box>
       
       {error && (
         <Typography color="error" sx={{ p: 2 }}>
@@ -138,7 +142,7 @@ const AdaptiveChartContainer: React.FC<AdaptiveChartContainerProps> = ({
       {showDownloadButton && !isLoading && !error && imageUrl && (
         <Box sx={{ mt: 1, textAlign: 'center' }}>
           <button onClick={handleDownload}>
-            Скачать изображение
+            Download Image
           </button>
         </Box>
       )}

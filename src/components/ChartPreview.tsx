@@ -598,17 +598,19 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
 
   return (
     <Box className="chart-preview">
-      {isLoading && <div className="loading">Загрузка графика...</div>}
-      {error && <div className="error">Ошибка: {error}</div>}
+      {isLoading && <div className="loading">Loading chart...</div>}
+      {error && <div className="error">Error: {error}</div>}
       <canvas
         ref={canvasRef}
         id={id}
         width={width}
         height={height}
         style={{ 
-          display: isLoading ? 'none' : 'block',
+          display: 'block',
           maxWidth: '100%',
-          height: 'auto'
+          height: 'auto',
+          opacity: isLoading ? 0 : 1,
+          transition: 'opacity 0.3s ease-in-out'
         }}
       />
       {tokenInfo && (

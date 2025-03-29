@@ -82,7 +82,7 @@ const tokenInfo = {
 };
 
 /**
- * Пример использования адаптивного компонента для графиков
+ * Example of using the adaptive component for charts
  */
 const AdaptiveChartExample: React.FC = () => {
   const [chartData, setChartData] = useState<any[]>([]);

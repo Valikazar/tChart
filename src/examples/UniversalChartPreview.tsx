@@ -83,8 +83,8 @@ const UniversalChartPreview: React.FC<ChartPreviewProps> = ({
   
   return (
     <div className="universal-chart-preview">
-      {isLoading && <div className="loading">Загрузка графика...</div>}
-      {error && <div className="error">Ошибка: {error}</div>}
+      {isLoading && <div className="loading">Loading chart...</div>}
+      {error && <div className="error">Error: {error}</div>}
       
       <canvas
         ref={canvasRef}
@@ -92,17 +92,19 @@ const UniversalChartPreview: React.FC<ChartPreviewProps> = ({
         width={width}
         height={height}
         style={{ 
-          display: isLoading ? 'none' : 'block',
+          display: 'block',
           maxWidth: '100%',
           height: 'auto',
-          aspectRatio: '1/1' // Сохраняем квадратные пропорции
+          aspectRatio: '1/1', // Preserve square aspect ratio
+          opacity: isLoading ? 0 : 1,
+          transition: 'opacity 0.3s ease-in-out'
         }}
       />
       
       {!isLoading && !error && (
         <div className="chart-actions" style={{ marginTop: '10px' }}>
           <button onClick={handleDownload}>
-            Скачать изображение
+            Download Image
           </button>
         </div>
       )}
@@ -113,7 +115,7 @@ const UniversalChartPreview: React.FC<ChartPreviewProps> = ({
 export default UniversalChartPreview;
 
 /**
- * Пример использования:
+ * Usage example:
  * 
  * import UniversalChartPreview from './examples/UniversalChartPreview';
  * import { defaultConfig } from './config';
@@ -122,7 +124,7 @@ export default UniversalChartPreview;
  *   const [data, setData] = useState([]);
  *   
  *   useEffect(() => {
- *     // Загрузка данных
+ *     // Loading data
  *     fetch('https://api.example.com/chart-data')
  *       .then(response => response.json())
  *       .then(chartData => setData(chartData));
@@ -130,7 +132,7 @@ export default UniversalChartPreview;
  *   
  *   return (
  *     <div>
- *       <h2>Мой график</h2>
+ *       <h2>My Chart</h2>
  *       <UniversalChartPreview
  *         config={defaultConfig}
  *         data={data}
