@@ -112,27 +112,6 @@ const AdaptiveChartContainer: React.FC<AdaptiveChartContainerProps> = ({
         ...style
       }}
     >
-      {/* Loading overlay with transition */}
-      <Box 
-        sx={{ 
-          position: 'absolute', 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          backgroundColor: 'rgba(0,0,0,0.1)',
-          zIndex: 2,
-          opacity: isLoading ? 1 : 0,
-          visibility: isLoading ? 'visible' : 'hidden',
-          transition: 'opacity 0.3s ease-in-out, visibility 0.3s ease-in-out',
-        }}
-      >
-        <CircularProgress />
-      </Box>
-      
       {error && (
         <Typography color="error" sx={{ p: 2 }}>
           {error}

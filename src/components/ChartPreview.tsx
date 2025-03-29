@@ -598,7 +598,6 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
 
   return (
     <Box className="chart-preview">
-      {isLoading && <div className="loading">Loading chart...</div>}
       {error && <div className="error">Error: {error}</div>}
       <canvas
         ref={canvasRef}

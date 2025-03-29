@@ -83,7 +83,6 @@ const UniversalChartPreview: React.FC<ChartPreviewProps> = ({
   
   return (
     <div className="universal-chart-preview">
-      {isLoading && <div className="loading">Loading chart...</div>}
       {error && <div className="error">Error: {error}</div>}
       
       <canvas
