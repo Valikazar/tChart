@@ -6,6 +6,31 @@ import { renderChart } from '../utils/chartRendererUniversal';
 // Кэш для изображений
 const imageCache = new Map<string, HTMLImageElement>();
 
+// Демо-данные для превью
+const DEMO_DATA = Array.from({ length: 24 }, (_, i) => {
+  const timestamp = Math.floor(Date.now() / 1000) - (24 - i) * 3600;
+  const basePrice = 0.00000450;
+  const volatility = 0.00000050;
+  const open = basePrice + (Math.random() - 0.5) * volatility;
+  const close = basePrice + (Math.random() - 0.5) * volatility;
+  const high = Math.max(open, close) + Math.random() * volatility * 0.5;
+  const low = Math.min(open, close) - Math.random() * volatility * 0.5;
+  return [timestamp, open, high, low, close];
+});
+
+// Демо-данные для информации о токене
+const DEMO_TOKEN_INFO = {
+  priceUsd: 0.00000450,
+  marketCap: 999000,
+  priceChange: {
+    '5m': 3.14,
+    '1h': -6.66,
+    '6h': 0.00,
+    '24h': 15.75,
+  },
+  name: 'Demo Token'
+};
+
 // Функция для предзагрузки изображения
 const preloadImage = (url: string): Promise<HTMLImageElement> => {
   if (imageCache.has(url)) {
@@ -25,7 +50,7 @@ const preloadImage = (url: string): Promise<HTMLImageElement> => {
 
 interface ChartPreviewProps {
   config: ChartConfig;
-  data: any[];
+  data?: any[];
   tokenInfo?: {
     priceUsd: number;
     marketCap: number;
@@ -42,6 +67,7 @@ interface ChartPreviewProps {
   height?: number;
   id?: string;
   tokenName?: string;
+  isPreview?: boolean;
 }
 
 /**
@@ -55,8 +81,13 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
   width = 1280,
   height = 1280,
   id = 'chart-canvas',
-  tokenName
+  tokenName,
+  isPreview = false
 }) => {
+  // Используем демо данные для превью или если не переданы реальные данные
+  const chartData = useMemo(() => (isPreview || !data || data.length === 0) ? DEMO_DATA : data, [data, isPreview]);
+  const chartTokenInfo = useMemo(() => (isPreview || !tokenInfo) ? DEMO_TOKEN_INFO : tokenInfo, [tokenInfo, isPreview]);
+  
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const bufferCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number>();
@@ -88,7 +119,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
   const drawChart = useCallback(async () => {
     const canvas = canvasRef.current;
     const bufferCanvas = bufferCanvasRef.current;
-    if (!canvas || !bufferCanvas || !data || data.length === 0 || isDrawingRef.current) return;
+    if (!canvas || !bufferCanvas || !chartData || chartData.length === 0 || isDrawingRef.current) return;
 
     isDrawingRef.current = true;
 
@@ -111,14 +142,14 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
       const chartRightMargin = rightMargin / 2;
 
       const totalWidth = canvas.width - chartLeftMargin - chartRightMargin;
-      const barWidth = totalWidth / (data.length * 1.15);
+      const barWidth = totalWidth / (chartData.length * 1.15);
       const gap = barWidth * 0.15;
 
-      const baseScaleMultiplier = 8 / (data?.length || 8);
-      const scaleRatio = tokenInfo ? (24 / data.length) : 1;
+      const baseScaleMultiplier = 8 / (chartData?.length || 8);
+      const scaleRatio = 24 / chartData.length;
 
       // Находим минимальную и максимальную цены
-      const prices = data.flatMap(([_, o, h, l, c]) => [
+      const prices = chartData.flatMap(([_, o, h, l, c]) => [
         typeof o === 'string' ? parseFloat(o) : o || 0,
         typeof h === 'string' ? parseFloat(h) : h || 0,
         typeof l === 'string' ? parseFloat(l) : l || 0,
@@ -162,8 +193,8 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
           barWidth: number;
         }> = [];
 
-        for (let i = 0; i < data.length; i++) {
-          const [timestamp, open, high, low, close] = data[i];
+        for (let i = 0; i < chartData.length; i++) {
+          const [timestamp, open, high, low, close] = chartData[i];
           const x = indexToX(i, chartLeftMargin, barWidth, gap);
           const y_open = priceToY(open, bufferCanvas.height, minPrice, priceRange, topMargin, bottomMargin);
           const y_close = priceToY(close, bufferCanvas.height, minPrice, priceRange, topMargin, bottomMargin);
@@ -362,15 +393,13 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
       bufferCtx.textBaseline = 'top';
 
       // Временные метки
-      const timeLabels = tokenInfo
-        ? Array.from({ length: 5 }, (_, i) => {
-            if (i === 4) return 'Now';
-            const timestamp = data[0][0] + ((data[data.length - 1][0] - data[0][0]) * i) / 4;
-            const timeDiffInSeconds = data[data.length - 1][0] - timestamp;
-            const hoursAgo = Math.round(timeDiffInSeconds / 3600);
-            return interval === 'day' ? `${Math.round(hoursAgo / 24)}D ago` : `${hoursAgo}h ago`;
-          })
-        : ['24h ago', '16h ago', '10h ago', '6h ago', 'Now'];
+      const timeLabels = Array.from({ length: 5 }, (_, i) => {
+        if (i === 4) return 'Now';
+        const timestamp = chartData[0][0] + ((chartData[chartData.length - 1][0] - chartData[0][0]) * i) / 4;
+        const timeDiffInSeconds = chartData[chartData.length - 1][0] - timestamp;
+        const hoursAgo = Math.round(timeDiffInSeconds / 3600);
+        return interval === 'day' ? `${Math.round(hoursAgo / 24)}D ago` : `${hoursAgo}h ago`;
+      });
 
       const labelPositions = Array.from({ length: timeLabels.length }, (_, i) => {
         // Добавляем отступ для первой и последней метки, чтобы они не выходили за границы
@@ -411,52 +440,39 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
       const topOffset = Math.round(bufferCanvas.height * 0.01);
 
       // Определяем изменения цены
-      const changes = tokenInfo
-        ? [
-            { period: '5M', value: tokenInfo.priceChange['5m'] },
-            { period: '1H', value: tokenInfo.priceChange['1h'] },
-            { period: '6H', value: tokenInfo.priceChange['6h'] },
-            { period: '24H', value: tokenInfo.priceChange['24h'] }
-          ]
-        : [
-            { period: '5M', value: 3.14 },
-            { period: '1H', value: -6.66 },
-            { period: '6H', value: 0.00 },
-            { period: '1D', value: 500.00 }
-          ];
+      const changes = [
+        { period: '5M', value: chartTokenInfo.priceChange['5m'] },
+        { period: '1H', value: chartTokenInfo.priceChange['1h'] },
+        { period: '6H', value: chartTokenInfo.priceChange['6h'] },
+        { period: '24H', value: chartTokenInfo.priceChange['24h'] }
+      ];
 
       // Отрисовка имени токена и MC
       if (config.display.showTokenName) {
-        const tokenNameText = tokenInfo?.name || 'Tryan';
+        const tokenNameText = chartTokenInfo?.name || tokenName || 'Token';
         bufferCtx.fillText(tokenNameText, leftMargin / 2, topOffset);
         
         if (config.display.showMarketCap) {
-          const mcText = tokenInfo 
-            ? formatMarketCap(tokenInfo.marketCap)
-            : 'MC: 999K';
+          const mcText = formatMarketCap(chartTokenInfo.marketCap);
           const tokenNameWidth = bufferCtx.measureText(tokenNameText).width;
           bufferCtx.fillText(mcText, leftMargin / 2 + tokenNameWidth + 20, topOffset);
         }
       } else if (config.display.showMarketCap) {
-        const mcText = tokenInfo 
-          ? formatMarketCap(tokenInfo.marketCap)
-          : 'MC: 999K';
+        const mcText = formatMarketCap(chartTokenInfo.marketCap);
         bufferCtx.fillText(mcText, leftMargin / 2, topOffset);
       }
 
       // Отрисовка Price
       if (config.display.showPrice) {
-        const priceText = tokenInfo
-          ? `Price: $${tokenInfo.priceUsd.toFixed(8)}`
-          : `Price: $${parseFloat(data[data.length - 1][4]).toFixed(8)}`;
+        const priceText = `Price: $${chartTokenInfo.priceUsd.toFixed(8)}`;
         const priceWidth = bufferCtx.measureText(priceText).width;
         // Размещаем текст справа вверху
         bufferCtx.fillText(priceText, bufferCanvas.width - (rightMargin / 2) - priceWidth, topOffset);
 
         // Отрисовка Min/Max если включено
         if (config.display.showMinMax) {
-          const minPrice = Math.min(...data.map(item => parseFloat(item[3])));
-          const maxPrice = Math.max(...data.map(item => parseFloat(item[2])));
+          const minPrice = Math.min(...chartData.map(item => parseFloat(item[3])));
+          const maxPrice = Math.max(...chartData.map(item => parseFloat(item[2])));
           const minMaxText = `Min/max: $${minPrice.toFixed(6)} / $${maxPrice.toFixed(7)}`;
           bufferCtx.font = `${config.font.size * 0.8}px ${config.font.family}`;
           // Размещаем текст Min/Max под текстом Price
@@ -561,7 +577,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
     } finally {
       isDrawingRef.current = false;
     }
-  }, [data, config, tokenInfo, interval, indexToX, priceToY]);
+  }, [chartData, config, chartTokenInfo, interval, indexToX, priceToY, tokenName]);
 
   // Запускаем отрисовку при изменении данных
   useEffect(() => {
@@ -572,8 +588,8 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
   }, [drawChart]);
 
   useEffect(() => {
-    // Если нет данных, не рисуем график
-    if (!data || data.length === 0) {
+    // Если нет данных и не превью, не рисуем график
+    if (!isPreview && (!data || data.length === 0)) {
       setIsLoading(false);
       return;
     }
@@ -594,7 +610,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
       });
     });
     
-  }, [config, data, tokenInfo, interval, width, height, drawChart]);
+  }, [config, data, tokenInfo, interval, width, height, drawChart, isPreview]);
 
   return (
     <Box className="chart-preview">
@@ -612,25 +628,25 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
           transition: 'opacity 0.3s ease-in-out'
         }}
       />
-      {tokenInfo && (
+      {!isPreview && chartTokenInfo && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle1" gutterBottom>
             Token Info:
           </Typography>
           <Typography>
-            Price: ${tokenInfo.priceUsd.toFixed(8)}
+            Price: ${chartTokenInfo.priceUsd.toFixed(8)}
           </Typography>
           <Typography>
-            Market Cap: ${tokenInfo.marketCap.toLocaleString()}
+            Market Cap: ${chartTokenInfo.marketCap.toLocaleString()}
           </Typography>
           <Typography>
             Price Changes:
           </Typography>
           <Box sx={{ pl: 2 }}>
-            <Typography>5m: {tokenInfo.priceChange['5m']}%</Typography>
-            <Typography>1h: {tokenInfo.priceChange['1h']}%</Typography>
-            <Typography>6h: {tokenInfo.priceChange['6h']}%</Typography>
-            <Typography>24h: {tokenInfo.priceChange['24h']}%</Typography>
+            <Typography>5m: {chartTokenInfo.priceChange['5m']}%</Typography>
+            <Typography>1h: {chartTokenInfo.priceChange['1h']}%</Typography>
+            <Typography>6h: {chartTokenInfo.priceChange['6h']}%</Typography>
+            <Typography>24h: {chartTokenInfo.priceChange['24h']}%</Typography>
           </Box>
         </Box>
       )}
