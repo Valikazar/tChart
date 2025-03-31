@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Grid, Paper, Typography, Collapse, Box, IconButton, Slider, Divider, FormControl, Select, MenuItem } from '@mui/material';
+import { Grid, Paper, Typography, Collapse, Box, IconButton, Divider, FormControl, Select, MenuItem } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ColorPicker from './ColorPicker';
@@ -230,44 +230,6 @@ const BarConfigurator: React.FC<BarConfiguratorProps> = ({
           )}
         </Collapse>
       </Grid>
-    );
-  };
-
-  const renderBarSection = (barType: BarType, title: string, barConfig: any) => {
-    const hasCenter = barType === 'candle' || barType === 'knife';
-
-    return (
-      <ConfigSection>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ mr: 2 }}>
-            {title}
-        </Typography>
-            <ColorPicker
-              color={barConfig.color}
-              onChange={(color) => onColorUpdate(barType, color)}
-          />
-        </Box>
-        <CompactGrid container spacing={2}>
-          {renderImageSection(barType, 'top', {
-            ...barConfig.top,
-            scale: barConfig.top?.scale || 1,
-            offsetX: barConfig.top?.offsetX || 0,
-            offsetY: barConfig.top?.offsetY || 0
-          })}
-          {hasCenter && renderImageSection(barType, 'center', {
-            ...barConfig.center,
-            scale: barConfig.center?.scale || 1,
-            offsetX: barConfig.center?.offsetX || 0,
-            offsetY: barConfig.center?.offsetY || 0
-          })}
-          {renderImageSection(barType, 'bottom', {
-            ...barConfig.bottom,
-            scale: barConfig.bottom?.scale || 1,
-            offsetX: barConfig.bottom?.offsetX || 0,
-            offsetY: barConfig.bottom?.offsetY || 0
-          })}
-        </CompactGrid>
-      </ConfigSection>
     );
   };
 

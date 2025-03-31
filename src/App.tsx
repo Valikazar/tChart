@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, CssBaseline, ThemeProvider, createTheme, Typography, Button, Grid, Box, Divider, FormControl, InputLabel, Select, MenuItem, Slider, Accordion, AccordionSummary, AccordionDetails, FormControlLabel, Checkbox, Paper } from '@mui/material';
+import { Container, CssBaseline, ThemeProvider, createTheme, Typography, Box, Divider, FormControl, InputLabel, Select, MenuItem, Accordion, AccordionSummary, AccordionDetails, FormControlLabel, Checkbox, Paper, Slider } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import BarConfigurator from './components/BarConfigurator';
 import BackgroundConfigurator from './components/BackgroundConfigurator';
@@ -133,27 +133,6 @@ const App: React.FC = () => {
     });
   };
 
-  const handleImageSettingsUpdate = (
-    barType: BarType,
-    partType: ImagePartType,
-    settings: { scale: number; offsetX: number; offsetY: number }
-  ) => {
-    setConfig(prevConfig => {
-      const newConfig = { ...prevConfig };
-      const barConfig = newConfig[barType];
-      if (barConfig && typeof barConfig === 'object') {
-        const imageSettings = (barConfig as any)[partType];
-        if (imageSettings) {
-          (barConfig as any)[partType] = {
-            ...imageSettings,
-            ...settings
-          };
-        }
-      }
-      return newConfig;
-    });
-  };
-
   const handleColorUpdate = (barType: BarType | 'background' | 'overlay', color: string) => {
     setConfig(prevConfig => {
       const newConfig = { ...prevConfig };
@@ -187,7 +166,7 @@ const App: React.FC = () => {
 
   const getFontBinaryData = async (fontFamily: string): Promise<string> => {
     try {
-      const fontPath = `../fonts/${fontFamily}.ttf`;
+      const fontPath = `fonts/${fontFamily}.ttf`;
       const response = await fetch(fontPath);
       const blob = await response.blob();
       return new Promise((resolve, reject) => {
@@ -263,13 +242,6 @@ const App: React.FC = () => {
       }
     };
     input.click();
-  };
-
-  const handleBarConfigUpdate = (barType: BarType, newConfig: BarConfig | ExtendedBarConfig) => {
-    setConfig(prev => ({
-      ...prev,
-      [barType]: newConfig
-    }));
   };
 
   const handleConfigChange = (path: string, value: any) => {

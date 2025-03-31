@@ -31,7 +31,6 @@ const ChartGenerator: React.FC<ChartGeneratorProps> = ({ config, onExport, onImp
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
-  const [data, setData] = useState<any[]>([]);
   const [isGenerated, setIsGenerated] = useState(false);
 
   // Загружаем список сетей при монтировании
@@ -197,7 +196,6 @@ const ChartGenerator: React.FC<ChartGeneratorProps> = ({ config, onExport, onImp
 
   const handleGenerate = () => {
     const newData = generateData(20);
-    setData(newData);
     setIsGenerated(true);
   };
 

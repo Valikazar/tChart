@@ -1,34 +1,28 @@
 import { ChartConfig } from '../types';
 
-// Определяем окружение выполнения
-const isNodeEnvironment = typeof window === 'undefined';
-
-// Загружаем библиотеки в зависимости от окружения
+// Загружаем skia-canvas
 let Canvas;
 let loadImageFunc;
 
-// Динамически импортируем skia-canvas
+// Динамически импортируем skia-canvas (работает как в Node.js, так и с полифилом skia-canvas в браузере)
 const initCanvas = async () => {
-  if (isNodeEnvironment) {
-    try {
-      // В Node.js используем обычный import
+  try {
+    if (typeof window === 'undefined') {
+      // Node.js
       const skiaCanvas = require('skia-canvas');
       Canvas = skiaCanvas.Canvas;
       loadImageFunc = skiaCanvas.loadImage;
-    } catch (e) {
-      console.error('Error loading skia-canvas in Node environment:', e);
-      console.error('Please install skia-canvas: npm install skia-canvas');
-      throw new Error('skia-canvas not found. Please install: npm install skia-canvas');
-    }
-  } else {
-    // В браузере используем глобальную переменную skia-canvas
-    if (window['skia-canvas']) {
+    } else {
+      // Браузер с полифилом
+      if (!window['skia-canvas']) {
+        throw new Error('skia-canvas not available in browser. Make sure to include skia-canvas-browser.js');
+      }
       Canvas = window['skia-canvas'].Canvas;
       loadImageFunc = window['skia-canvas'].loadImage;
-    } else {
-      console.error('skia-canvas not found in browser. Make sure to include skia-canvas-browser.js');
-      throw new Error('skia-canvas not available in browser. Make sure to include skia-canvas-browser.js');
     }
+  } catch (e) {
+    console.error('Error loading skia-canvas:', e);
+    throw new Error('skia-canvas not found. Please install: npm install skia-canvas');
   }
 };
 
@@ -61,7 +55,7 @@ interface RenderChartParams {
   width?: number;
   height?: number;
   outputPath?: string; // Путь для сохранения файла (опционально)
-  canvas?: any; // Опциональный canvas
+  canvas?: any; // Опциональный skia-canvas
 }
 
 interface RenderOutput {
@@ -114,18 +108,9 @@ export async function renderChart({
   let ctx;
   
   if (existingCanvas) {
-    // Проверяем, что переданный canvas совместим с skia-canvas
-    if (existingCanvas instanceof HTMLCanvasElement && !isNodeEnvironment) {
-      // Если передан HTML-canvas, создаем новый skia-canvas и копируем данные
-      canvas = new Canvas(existingCanvas.width, existingCanvas.height);
-      ctx = canvas.getContext('2d');
-      
-      // Позже скопируем содержимое нового canvas обратно в HTML-canvas
-    } else {
-      // Используем переданный skia-canvas
-      canvas = existingCanvas;
-      ctx = canvas.getContext('2d');
-    }
+    // Используем переданный skia-canvas
+    canvas = existingCanvas;
+    ctx = canvas.getContext('2d');
   } else {
     // Создаем новый canvas
     canvas = new Canvas(width, height);
@@ -337,40 +322,20 @@ export async function renderChart({
   // Получаем результаты рендеринга
   let base64 = canvas.toDataURL('image/png');
 
-  // Если передан HTML-canvas, копируем данные
-  if (existingCanvas instanceof HTMLCanvasElement && !isNodeEnvironment) {
-    const htmlCtx = existingCanvas.getContext('2d');
-    if (htmlCtx) {
-      // Копируем данные из skia-canvas в HTML-canvas
-      const imageData = htmlCtx.createImageData(canvas.width, canvas.height);
-      const skiaImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < skiaImageData.data.length; i++) {
-        imageData.data[i] = skiaImageData.data[i];
-      }
-      htmlCtx.putImageData(imageData, 0, 0);
-    }
+  // Адаптируем результат в зависимости от окружения
+  const isNodeEnvironment = typeof window === 'undefined';
+  
+  if (isNodeEnvironment && outputPath) {
+    const fs = require('fs');
+    const buffer = canvas.toBuffer('image/png');
+    fs.writeFileSync(outputPath, buffer);
+    return { buffer, base64, canvas };
   }
-
-  if (isNodeEnvironment) {
-    // Для Node.js 
-    // Если указан путь для сохранения, записываем файл
-    if (outputPath) {
-      const fs = require('fs');
-      const buffer = canvas.toBuffer('image/png');
-      fs.writeFileSync(outputPath, buffer);
-      return { buffer, base64, canvas };
-    }
-    
-    return { 
-      buffer: canvas.toBuffer('image/png'),
-      base64,
-      canvas 
-    };
-  } else {
-    // Для браузера
-    return { 
-      base64,
-      canvas 
-    };
-  }
+  
+  // Возвращаем результат
+  return { 
+    buffer: isNodeEnvironment ? canvas.toBuffer('image/png') : undefined,
+    base64,
+    canvas 
+  };
 } 
