@@ -1,23 +1,4 @@
 import { ChartConfig } from '../types';
-// Используем функциональность для определения среды выполнения (браузер/node)
-const isNodeEnvironment = typeof window === 'undefined';
-
-// Импортируем canvas в зависимости от среды
-let Canvas;
-let loadImageFunc;
-
-// В среде Node.js используем skia-canvas
-if (isNodeEnvironment) {
-  try {
-    // Требуется установить: npm install skia-canvas
-    const skiaCanvas = require('skia-canvas');
-    Canvas = skiaCanvas.Canvas;
-    loadImageFunc = skiaCanvas.loadImage;
-  } catch (e) {
-    console.error('Error loading skia-canvas:', e);
-    console.error('Please install skia-canvas: npm install skia-canvas');
-  }
-} 
 
 interface ChartData {
   timestamp: number;
@@ -47,14 +28,12 @@ interface RenderChartParams {
   interval?: string;
   width?: number;
   height?: number;
-  outputPath?: string; // Путь для сохранения файла (опционально)
-  canvas?: HTMLCanvasElement | OffscreenCanvas; // Опциональный canvas из браузера
+  canvas?: HTMLCanvasElement | OffscreenCanvas; // Canvas из браузера
 }
 
 interface RenderOutput {
-  buffer?: Buffer;
   base64: string;
-  canvas?: any;
+  canvas?: HTMLCanvasElement | OffscreenCanvas;
 }
 
 // Вспомогательные функции
@@ -66,19 +45,8 @@ function indexToX(index: number, leftMargin: number, barWidth: number, gap: numb
   return leftMargin + index * (barWidth + gap);
 }
 
-// Функция предзагрузки изображения в Node.js
-async function preloadImageNode(url: string): Promise<any> {
-  try {
-    // Поддержка как локальных файлов, так и URL
-    return await loadImageFunc(url);
-  } catch (error) {
-    console.error('Error loading image:', error);
-    throw error;
-  }
-}
-
 // Функция предзагрузки изображения в браузере
-async function preloadImageBrowser(url: string): Promise<HTMLImageElement> {
+async function preloadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
@@ -89,9 +57,9 @@ async function preloadImageBrowser(url: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Универсальная функция отрисовки графика для Node.js и браузера
+ * Функция отрисовки графика для браузера
  * @param params Параметры для рендеринга графика
- * @returns Promise<RenderOutput> Результат рендеринга (зависит от среды)
+ * @returns Promise<RenderOutput> Результат рендеринга
  */
 export async function renderChart({
   config,
@@ -100,26 +68,18 @@ export async function renderChart({
   interval = 'hour',
   width = 1280,
   height = 1280,
-  outputPath,
   canvas: existingCanvas
 }: RenderChartParams): Promise<RenderOutput> {
-  // Определяем среду и подготавливаем canvas и контекст
+  // Определяем и подготавливаем canvas и контекст
   let canvas;
   let ctx;
   
   if (existingCanvas) {
-    // Используем переданный canvas (для браузера)
+    // Используем переданный canvas
     canvas = existingCanvas;
     ctx = canvas.getContext('2d');
-  } else if (isNodeEnvironment) {
-    // В Node.js создаем новый canvas с помощью skia-canvas
-    if (!Canvas) {
-      throw new Error('skia-canvas не найден. Пожалуйста, установите: npm install skia-canvas');
-    }
-    canvas = new Canvas(width, height);
-    ctx = canvas.getContext('2d');
   } else {
-    // В браузере создаем HTML5 canvas
+    // Создаем новый canvas
     canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -173,10 +133,7 @@ export async function renderChart({
   // Отрисовка фона
   if (config.background.image?.url) {
     try {
-      const backgroundImg = isNodeEnvironment 
-        ? await preloadImageNode(config.background.image.url)
-        : await preloadImageBrowser(config.background.image.url);
-      
+      const backgroundImg = await preloadImage(config.background.image.url);
       ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
 
       // Проверяем наличие свойства opacity с учетом возможного отсутствия
@@ -249,131 +206,24 @@ export async function renderChart({
     }
 
     // Отрисовка тела бара
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x, Math.min(y_open, y_close), barWidth, Math.abs(y_close - y_open));
-    ctx.clip();
+    ctx.fillStyle = barConfig.color;
+    ctx.fillRect(x, Math.min(y_open, y_close), barWidth, Math.abs(y_close - y_open));
 
-    if (barConfig.body?.url) {
-      try {
-        const bodyImg = isNodeEnvironment
-          ? await preloadImageNode(barConfig.body.url)
-          : await preloadImageBrowser(barConfig.body.url);
-          
-        const bodyHeight = Math.max(1, Math.abs(barHeight));
-        const bodyWidth = Math.max(1, barWidth);
-        const bodyY = Math.min(y_open, y_close);
-        const scale = barConfig.body?.scale || 1;
-        const imgRatio = (bodyImg.width / bodyImg.height) * scale;
-        const scaledWidth = bodyWidth;
-        const scaledHeight = bodyWidth / imgRatio;
-        const startFrom = barConfig.body?.startFrom || 'top';
-
-        if (startFrom === 'fill') {
-          const tileHeight = scaledHeight * 0.98;
-          const numTiles = Math.max(1, Math.ceil(bodyHeight / tileHeight));
-          const adjustedTileHeight = bodyHeight / numTiles + (scaledHeight * 0.02);
-
-          for (let j = 0; j < numTiles; j++) {
-            ctx.drawImage(
-              bodyImg,
-              x + (barConfig.body?.offsetX || 0),
-              bodyY + j * (adjustedTileHeight - scaledHeight * 0.02),
-              bodyWidth,
-              adjustedTileHeight
-            );
-          }
-        } else {
-          const repetitions = Math.ceil(bodyHeight / (scaledHeight * 0.98)) + 1;
-          let currentY = startFrom === 'top' ? bodyY : bodyY + bodyHeight - scaledHeight;
-
-          for (let j = 0; j < repetitions; j++) {
-            if (startFrom === 'top' && currentY + scaledHeight > bodyY + bodyHeight) {
-              const remainingHeight = bodyY + bodyHeight - currentY;
-              ctx.drawImage(
-                bodyImg,
-                0, 0,
-                bodyImg.width, bodyImg.height * (remainingHeight / scaledHeight),
-                x + (barConfig.body?.offsetX || 0), currentY,
-                bodyWidth, remainingHeight
-              );
-              break;
-            } else if (startFrom === 'bottom' && currentY < bodyY) {
-              const remainingHeight = scaledHeight - (bodyY - currentY);
-              ctx.drawImage(
-                bodyImg,
-                0, bodyImg.height - (bodyImg.height * (remainingHeight / scaledHeight)),
-                bodyImg.width, bodyImg.height * (remainingHeight / scaledHeight),
-                x + (barConfig.body?.offsetX || 0), bodyY,
-                bodyWidth, remainingHeight
-              );
-              break;
-            }
-
-            ctx.drawImage(
-              bodyImg,
-              x + (barConfig.body?.offsetX || 0),
-              currentY,
-              bodyWidth,
-              scaledHeight
-            );
-
-            currentY += startFrom === 'top' ? (scaledHeight * 0.98) : -(scaledHeight * 0.98);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading body image:', error);
-        ctx.fillStyle = barConfig.color;
-        ctx.fillRect(x, Math.min(y_open, y_close), barWidth, Math.abs(y_close - y_open));
-      }
-    } else {
-      ctx.fillStyle = barConfig.color;
-      ctx.fillRect(x, Math.min(y_open, y_close), barWidth, Math.abs(y_close - y_open));
-    }
-
-    ctx.restore();
-
-    // Отрисовка границ
+    // Отрисовка границы бара, если настроена
     if ((barConfig.borderWidth || 0) > 0) {
-      ctx.strokeStyle = barConfig.borderColor || barConfig.color;
-      const borderWidth = (barConfig.borderWidth || 1) * baseScaleMultiplier * scaleRatio * 2;
-      ctx.lineWidth = borderWidth;
-      
-      if (barConfig.borderStyle === 'inside') {
-        const halfBorder = borderWidth / 2;
-        ctx.strokeRect(
-          x + halfBorder,
-          Math.min(y_open, y_close) + halfBorder,
-          barWidth - borderWidth,
-          Math.abs(y_close - y_open) - borderWidth
-        );
-      } else {
-        const offset = borderWidth / 2;
-        ctx.strokeRect(
-          x - offset,
-          Math.min(y_open, y_close) - offset,
-          barWidth + borderWidth,
-          Math.abs(y_close - y_open) + borderWidth
-        );
-      }
+      ctx.strokeStyle = barConfig.borderColor || '#FFFFFF';
+      ctx.lineWidth = barConfig.borderWidth || 1;
+      ctx.strokeRect(x, Math.min(y_open, y_close), barWidth, Math.abs(y_close - y_open));
     }
   }
 
-  // Отрисовка текста и меток
-  ctx.font = `${config.font.size}px ${config.font.family}`;
-  ctx.fillStyle = config.font.color;
+  // Добавление метаданных
+
+  ctx.font = `${config.font.size || 20}px ${config.font.family || 'Arial'}`;
+  ctx.fillStyle = config.font.color || '#FFFFFF';
   ctx.textBaseline = 'top';
 
-  // Добавляем тень для текста
-  ctx.shadowColor = 'black';
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
-
-  // Определяем topOffset для всех элементов
-  const topOffset = Math.round(canvas.height * 0.02);
-
-  // Форматируем market cap
+  // Форматируем цену и market cap
   const formatMarketCap = (value: number) => {
     if (value >= 1e9) {
       return `MC: $${(value / 1e9).toFixed(2)}B`;
@@ -386,194 +236,33 @@ export async function renderChart({
     }
   };
 
-  // Временные метки
-  const timeLabels = tokenInfo
-    ? Array.from({ length: 5 }, (_, i) => {
-        if (i === 4) return 'Now';
-        const timestamp = data[0].timestamp + ((data[data.length - 1].timestamp - data[0].timestamp) * i) / 4;
-        const timeDiffInSeconds = data[data.length - 1].timestamp - timestamp;
-        const hoursAgo = Math.round(timeDiffInSeconds / 3600);
-        return interval === 'day' ? `${Math.round(hoursAgo / 24)}D ago` : `${hoursAgo}h ago`;
-      })
-    : ['24h ago', '16h ago', '10h ago', '6h ago', 'Now'];
-
-  const labelPositions = Array.from({ length: timeLabels.length }, (_, i) => {
-    // Добавляем отступ для первой и последней метки, чтобы они не выходили за границы
-    if (i === 0) {
-      return leftMargin + 10; // Добавляем отступ для первой метки
-    } else if (i === timeLabels.length - 1) {
-      return canvas.width - rightMargin - 10; // Добавляем отступ для последней метки
-    } else {
-      return leftMargin + i * (canvas.width - leftMargin - rightMargin) / (timeLabels.length - 1);
-    }
-  });
-
-  // Отрисовка имени токена и MC
-  if (config.display.showTokenName) {
-    const tokenNameText = tokenInfo?.name || 'Tryan';
-    ctx.fillText(tokenNameText, leftMargin / 2, topOffset);
+  if (tokenInfo) {
+    // Отрисовка имени токена
+    ctx.fillText(tokenInfo.name, chartLeftMargin, 10);
     
-    if (config.display.showMarketCap) {
-      const mcText = tokenInfo 
-        ? formatMarketCap(tokenInfo.marketCap)
-        : 'MC: 999K';
-      const tokenNameWidth = ctx.measureText(tokenNameText).width;
-      ctx.fillText(mcText, leftMargin / 2 + tokenNameWidth + 20, topOffset);
-    }
-  } else if (config.display.showMarketCap) {
-    const mcText = tokenInfo 
-      ? formatMarketCap(tokenInfo.marketCap)
-      : 'MC: 999K';
-    ctx.fillText(mcText, leftMargin / 2, topOffset);
-  }
-
-  // Отрисовка Price
-  if (config.display.showPrice) {
-    const priceText = tokenInfo
-      ? `Price: $${tokenInfo.priceUsd.toFixed(8)}`
-      : `Price: $${parseFloat(data[data.length - 1][4]).toFixed(8)}`;
-    const textWidth = ctx.measureText(priceText).width;
-    // Размещаем текст справа вверху
-    ctx.fillText(priceText, canvas.width - rightMargin - textWidth, topOffset);
-
-    // Отрисовка Min/Max если включено
-    if (config.display.showMinMax) {
-      const minPrice = Math.min(...data.map(item => parseFloat(Array.isArray(item) ? item[3] : item.low)));
-      const maxPrice = Math.max(...data.map(item => parseFloat(Array.isArray(item) ? item[2] : item.high)));
-      const minMaxText = `Min/max: $${minPrice.toFixed(6)} / $${maxPrice.toFixed(7)}`;
-      ctx.font = `${config.font.size * 0.8}px ${config.font.family}`;
-      // Размещаем текст Min/Max под текстом Price
-      const minMaxWidth = ctx.measureText(minMaxText).width;
-      ctx.fillText(minMaxText, canvas.width - rightMargin - minMaxWidth, topOffset + config.font.size * 1.2);
-      ctx.font = `${config.font.size}px ${config.font.family}`; // Восстанавливаем исходный размер шрифта
-    }
-  }
-
-  // Отрисовка временных меток
-  if (config.display.showTimeline) {
-    // Отрисовка теней и текста временных меток
-    timeLabels.forEach((label, i) => {
-      const textWidth = ctx.measureText(label).width;
-      const yPosition = config.display.showPriceChange 
-        ? canvas.height - bottomMargin + 50  // Если Price Change активен, рисуем над линией
-        : canvas.height - bottomMargin + 110; // Если Price Change неактивен, рисуем внизу
-      
-      // Рассчитываем позицию X с учетом выхода за границы
-      let xPosition = labelPositions[i] - textWidth / 2;
-      
-      // Проверяем, не выходит ли текст за левую границу
-      if (xPosition < leftMargin / 2) {
-        xPosition = leftMargin / 2;
-      }
-      
-      // Проверяем, не выходит ли текст за правую границу
-      if (xPosition + textWidth > canvas.width - rightMargin / 2) {
-        xPosition = canvas.width - rightMargin / 2 - textWidth;
-      }
-      
-      // Добавляем усиленную тень для лучшей читаемости
-      ctx.save();
-      ctx.shadowColor = 'black';
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 2;
-      
-      // Сам текст временных меток
-      ctx.fillStyle = config.font.color;
-      ctx.fillText(label, xPosition, yPosition);
-      ctx.restore();
-    });
-  }
-
-  // Если включены price change, добавляем их в последнюю очередь, чтобы они были поверх всех элементов
-  if (config.display.showPriceChange) {
-    const changes = tokenInfo
-      ? [
-          { period: '5M', value: tokenInfo.priceChange['5m'] },
-          { period: '1H', value: tokenInfo.priceChange['1h'] },
-          { period: '6H', value: tokenInfo.priceChange['6h'] },
-          { period: '24H', value: tokenInfo.priceChange['24h'] }
-        ]
-      : [
-          { period: '5M', value: 3.14 },
-          { period: '1H', value: -6.66 },
-          { period: '6H', value: 0.00 },
-          { period: '1D', value: 500.00 }
-        ];
+    // Отрисовка market cap
+    const mcText = formatMarketCap(tokenInfo.marketCap);
+    const nameWidth = ctx.measureText(tokenInfo.name).width;
+    ctx.fillText(mcText, chartLeftMargin + nameWidth + 20, 10);
     
-    const changeWidth = (canvas.width - leftMargin / 2 - rightMargin / 2) / changes.length;
+    // Отрисовка цены
+    const priceText = `$${tokenInfo.priceUsd.toFixed(8)}`;
+    const priceWidth = ctx.measureText(priceText).width;
+    ctx.fillText(priceText, canvas.width - chartRightMargin - priceWidth, 10);
     
-    // Отрисовка разделительной линии
-    ctx.strokeStyle = 'yellow';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(leftMargin / 2, canvas.height - bottomMargin + 97);
-    ctx.lineTo(canvas.width - rightMargin / 2, canvas.height - bottomMargin + 97);
-    ctx.stroke();
+    // Отрисовка изменений цены
+    const yPos = canvas.height - 40;
+    const xStep = (canvas.width - leftMargin - rightMargin) / 4;
     
-    // Отрисовка текста price change с тенями вместо фона
-    changes.forEach((change, i) => {
-      const x = leftMargin / 2 + i * changeWidth + changeWidth / 2;
-      const text = `${change.period}: ${change.value >= 0 ? '+' : ''}${change.value.toFixed(2)}%`;
-      const textWidth = ctx.measureText(text).width;
-      
-      // Рассчитываем позицию X с учетом выхода за границы
-      let xPosition = x - textWidth / 2;
-      
-      // Проверяем, не выходит ли текст за левую границу
-      if (xPosition < leftMargin / 2) {
-        xPosition = leftMargin / 2;
-      }
-      
-      // Проверяем, не выходит ли текст за правую границу
-      if (xPosition + textWidth > canvas.width - rightMargin / 2) {
-        xPosition = canvas.width - rightMargin / 2 - textWidth;
-      }
-      
-      // Добавляем усиленную тень для лучшей читаемости
-      ctx.save();
-      ctx.shadowColor = 'black';
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 2;
-      
-      // Отрисовываем текст изменения цены
-      ctx.fillStyle = change.value > 0 ? config.upBar.color : change.value < 0 ? config.downBar.color : 'yellow';
-      ctx.fillText(text, xPosition, canvas.height - bottomMargin + 110);
-      ctx.restore();
-    });
+    ctx.fillText(`5m: ${tokenInfo.priceChange['5m'].toFixed(2)}%`, leftMargin + xStep * 0, yPos);
+    ctx.fillText(`1h: ${tokenInfo.priceChange['1h'].toFixed(2)}%`, leftMargin + xStep * 1, yPos);
+    ctx.fillText(`6h: ${tokenInfo.priceChange['6h'].toFixed(2)}%`, leftMargin + xStep * 2, yPos);
+    ctx.fillText(`24h: ${tokenInfo.priceChange['24h'].toFixed(2)}%`, leftMargin + xStep * 3, yPos);
   }
 
-  // Сбрасываем тень
-  ctx.shadowColor = 'transparent';
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
-
-  // Возвращаем результат в зависимости от среды
-  if (isNodeEnvironment) {
-    // В Node.js возвращаем буфер и base64
-    const buffer = await canvas.toBuffer('png');
-    const base64 = buffer.toString('base64');
-
-    // Если указан путь для сохранения, сохраняем картинку
-    if (outputPath) {
-      await canvas.saveAs(outputPath);
-    }
-
-    return {
-      buffer,
-      base64: `data:image/png;base64,${base64}`,
-      canvas
-    };
-  } else {
-    // В браузере возвращаем base64 и canvas
-    return {
-      base64: canvas.toDataURL('image/png'),
-      canvas
-    };
-  }
-}
-
-// Алиас для обратной совместимости
-export const renderChartNode = renderChart; 
+  // Возвращаем результат
+  return {
+    base64: canvas.toDataURL('image/png'),
+    canvas
+  };
+} 

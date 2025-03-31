@@ -18,7 +18,6 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8",
     "react-scripts": "^5.0.1",
-    "skia-canvas": "^1.0.1",
     "typescript": "^4.9.5",
     "webpack-dev-server": "^5.2.1"
   },
@@ -47,6 +46,7 @@
     ]
   },
   "devDependencies": {
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "webpack-node-externals": "^3.0.0"
   }
 }

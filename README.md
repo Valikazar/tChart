@@ -2,9 +2,9 @@
 
 Tool for creating and configuring cryptocurrency charts.
 
-## New Functionality: Universal Chart Generation
+## Chart Generation
 
-You can now generate charts both in the browser and in Node.js without a browser, using a single universal function. The standard chart size is a square 1280x1280.
+You can now generate charts in the browser using the standard Canvas API. The standard chart size is a square 1280x1280.
 
 ## New: Adaptive Charts
 
@@ -68,40 +68,9 @@ useEffect(() => {
 ```bash
 # Install dependencies
 npm install
-
-# Install skia-canvas (for Node.js mode without browser)
-npm install skia-canvas
 ```
 
 ### Code Usage Examples
-
-#### Node.js Mode (No Browser)
-
-```typescript
-import { generateChartImage } from './utils/generateChartImage';
-import defaultConfig from './config/defaultChartConfig';
-
-// OHLCV data
-const data = [
-  [1617235200, 100, 120, 90, 110, 1000], // [timestamp, open, high, low, close, volume]
-  [1617321600, 110, 130, 100, 120, 1200],
-  // ...
-];
-
-// Generate and save chart
-generateChartImage({
-  config: defaultConfig,
-  data,
-  outputPath: 'output/chart.png'
-})
-.then(result => {
-  console.log('Chart saved:', result.filePath);
-  console.log('Base64 string:', result.base64);
-})
-.catch(error => {
-  console.error('Error:', error);
-});
-```
 
 #### Browser Mode
 
@@ -161,38 +130,10 @@ const result = await renderChart({
   config,
   data,
   // width and height are 1280x1280 by default
-  // In browser:
   canvas
-  // In Node.js:
-  // outputPath: 'path/to/save/image.png'
 });
 
-// In browser: result.canvas and result.base64
-// In Node.js: result.buffer, result.base64
-```
-
-### Using the CLI Utility
-
-The project includes a CLI utility for generating charts from the command line:
-
-```bash
-# Run via npm script
-npm run generate-chart -- --config examples/config.json --data examples/data.json --output output/chart.png
-
-# Or directly via ts-node
-npx ts-node src/cli/generateChart.ts --config examples/config.json --data examples/data.json --output output/chart.png
-```
-
-### CLI Parameters
-
-```
---config <path>   Path to JSON file with chart configuration
---data <path>     Path to JSON file with OHLCV data
---output <path>   Path to save the image (default: chart.png)
---width <number>  Chart width in pixels (default: 1280)
---height <number> Chart height in pixels (default: 1280)
---interval <type> Interval for time labels (hour, day) (default: hour)
---help, -h        Show help
+// Result contains: result.canvas and result.base64
 ```
 
 ### Data Format
@@ -265,6 +206,12 @@ Example structure of configuration:
   }
 }
 ```
+
+### Technical Notes
+
+1. The chart renderer uses standard browser Canvas API for rendering
+2. All chart components are fully configurable: colors, styles, and more
+3. For backend rendering, consider using a headless browser or other server-side image generation libraries
 
 ## Notes
 
