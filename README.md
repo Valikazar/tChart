@@ -4,136 +4,43 @@ Tool for creating and configuring cryptocurrency charts.
 
 ## Chart Generation
 
-You can now generate charts in the browser using the standard Canvas API. The standard chart size is a square 1280x1280.
+The library provides a flexible chart generation system using the standard Canvas API. The standard chart size is a square 1280x1280.
 
-## New: Adaptive Charts
+## Components
 
-The library now supports adaptive charts that automatically adjust to their container size, which significantly improves display across various devices and screen resolutions. Adaptive charts prevent overlapping with other UI elements (like accordions).
+### ChartPreview Component
 
-### Improved Information Display
+The main component for rendering charts with full control over appearance and behavior:
 
-* The current price and min/max prices are now displayed in the top right corner of the chart for better visibility
-* All text elements (timeline labels, price changes) have enhanced shadows instead of semi-transparent backgrounds, which significantly improves their readability when using background images
-* Price changes are always displayed on top of other chart elements, preventing them from being obscured by background images and overlays
+```tsx
+import ChartPreview from './components/ChartPreview';
 
-### Using the AdaptiveChartContainer Component
+<ChartPreview
+  config={config}
+  data={data}
+  tokenInfo={tokenInfo}
+  interval="hour"
+  width={1280}
+  height={1280}
+  isPreview={false}
+/>
+```
+
+### AdaptiveChartContainer Component
+
+A wrapper component that automatically adjusts the chart size to its container:
 
 ```tsx
 import AdaptiveChartContainer from './components/AdaptiveChartContainer';
 
-// In your component:
 <AdaptiveChartContainer
   config={config}
   data={data}
   tokenInfo={tokenInfo}
   preserveAspectRatio={true} // Whether to maintain a 1:1 aspect ratio
   minHeight={400} // Minimum container height
-  showDownloadButton={true} // Show download button
+  isPreview={false} // Whether to show preview mode
 />
-```
-
-Low-level functions are also available for more flexible configuration:
-
-```tsx
-import { renderAdaptiveChart, setupResizeObserver } from './utils/adaptiveChartRenderer';
-
-// In your component with useRef and useEffect:
-const containerRef = useRef<HTMLDivElement>(null);
-
-useEffect(() => {
-  if (containerRef.current && data) {
-    const renderChart = async () => {
-      await renderAdaptiveChart({
-        config,
-        data,
-        container: containerRef.current!,
-        preserveAspectRatio: true
-      });
-    };
-    
-    renderChart();
-    
-    // Automatic update when size changes
-    const cleanup = setupResizeObserver(containerRef.current, renderChart);
-    return cleanup;
-  }
-}, [data, config]);
-
-// In JSX:
-<div ref={containerRef} style={{ width: '100%', minHeight: '400px' }}></div>
-```
-
-### Installation
-
-```bash
-# Install dependencies
-npm install
-```
-
-### Code Usage Examples
-
-#### Browser Mode
-
-```typescript
-import { generateChartImage } from './utils/generateChartImage';
-import defaultConfig from './config/defaultChartConfig';
-
-// OHLCV data
-const data = [
-  [1617235200, 100, 120, 90, 110, 1000],
-  [1617321600, 110, 130, 100, 120, 1200],
-  // ...
-];
-
-// Use existing canvas
-const canvas = document.getElementById('my-chart-canvas') as HTMLCanvasElement;
-
-// Set canvas dimensions (standard is 1280x1280)
-canvas.width = 1280;
-canvas.height = 1280;
-
-// Generate chart in browser
-generateChartImage({
-  config: defaultConfig,
-  data,
-  canvas,
-  // width and height are optional - default is 1280x1280
-})
-.then(result => {
-  // Canvas already contains the rendered chart
-  // You can also use base64 to create an image
-  const img = document.createElement('img');
-  img.src = result.base64;
-  document.body.appendChild(img);
-})
-.catch(error => {
-  console.error('Error:', error);
-});
-```
-
-### Direct Usage of renderChart Function
-
-You can also use the base renderChart function directly:
-
-```typescript
-import { renderChart } from './utils/chartRendererUniversal';
-
-// ...
-
-// Get or create canvas element
-const canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
-canvas.width = 1280;
-canvas.height = 1280;
-
-// Call the rendering function
-const result = await renderChart({
-  config,
-  data,
-  // width and height are 1280x1280 by default
-  canvas
-});
-
-// Result contains: result.canvas and result.base64
 ```
 
 ### Data Format
@@ -163,7 +70,7 @@ Or in object format:
 ]
 ```
 
-### Format of Configuration
+### Configuration Format
 
 Example structure of configuration:
 
@@ -207,16 +114,40 @@ Example structure of configuration:
 }
 ```
 
+### Features
+
+1. Automatic scaling based on the number of bars and chart size
+2. Support for custom bar styles (colors, borders, images)
+3. Configurable display options (token name, market cap, price changes)
+4. Enhanced text readability with shadows
+5. Support for background images and overlays
+6. Timeline display with automatic formatting
+7. Price change indicators with color coding
+8. Adaptive sizing with aspect ratio preservation option
+
 ### Technical Notes
 
-1. The chart renderer uses standard browser Canvas API for rendering
-2. All chart components are fully configurable: colors, styles, and more
-3. For backend rendering, consider using a headless browser or other server-side image generation libraries
+1. Uses standard browser Canvas API for rendering
+2. All chart components are fully configurable
+3. Supports both static and responsive layouts
+4. Optimized for performance with double buffering
+5. Handles window resize events automatically
+6. Supports both preview and full modes
+
+## New: Adaptive Charts
+
+The library now supports adaptive charts that automatically adjust to their container size, which significantly improves display across various devices and screen resolutions. Adaptive charts prevent overlapping with other UI elements (like accordions).
+
+### Improved Information Display
+
+* The current price and min/max prices are now displayed in the top right corner of the chart for better visibility
+* All text elements (timeline labels, price changes) have enhanced shadows instead of semi-transparent backgrounds, which significantly improves their readability when using background images
+* Price changes are always displayed on top of other chart elements, preventing them from being obscured by background images and overlays
 
 ## Notes
 
-1. Both in Node.js and browser environments skia-canvas is used for rendering
-2. In browser mode, a polyfill implementation of skia-canvas is provided automatically
-3. You should include the skia-canvas-browser.js script before your application code
-4. The same API works in both environments - no need to change your code between Node.js and browser
-5. On Windows, you may need to install additional dependencies for skia-canvas 
+1. The library uses the standard browser Canvas API for rendering
+2. All chart components are fully configurable
+3. The same API works across all environments - no need to change your code
+4. The library is optimized for performance with double buffering
+5. All text elements have enhanced shadows for better readability 
