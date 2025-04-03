@@ -7,6 +7,8 @@ export interface ImageConfig {
   offsetX: number;
   offsetY?: number;
   startFrom?: 'top' | 'bottom' | 'fill';
+  rotation?: number;
+  overlap?: number; // процент нахлёста при тайлинге (0-99)
 }
 
 export interface BackgroundConfig {

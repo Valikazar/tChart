@@ -209,6 +209,9 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
           const useKnife = isUpBar && barHeight > heightThreshold;
           const barConfig = useCandle ? config.candle : useKnife ? config.knife : !isUpBar ? config.upBar : config.downBar;
 
+          // Определяем направление заполнения для body в зависимости от типа бара
+          const fillDirection = (useCandle || (!isUpBar)) ? 'bottom-to-top' : 'top-to-bottom';
+
           // Добавляем center изображение в массив для последующей отрисовки
           if ((useCandle || useKnife) && (barConfig as ExtendedBarConfig).center?.url) {
             centerImages.push({
@@ -242,61 +245,198 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
               const bodyWidth = Math.max(1, barWidth);
               const bodyY = Math.min(y_open, y_close);
               const scale = barConfig.body?.scale || 1;
-              const imgRatio = (bodyImg.width / bodyImg.height) * scale;
-              const scaledWidth = bodyWidth;
-              const scaledHeight = bodyWidth / imgRatio;
+              const rotation = barConfig.body?.rotation || 0;
+              const offsetX = barConfig.body?.offsetX || 0;
               const startFrom = barConfig.body?.startFrom || 'top';
+              const overlap = barConfig.body?.overlap !== undefined ? barConfig.body.overlap / 100 : 0.02;
 
+              // Создаем временный канвас для поворота изображения
+              const tempCanvas = document.createElement('canvas');
+              const tempCtx = tempCanvas.getContext('2d');
+              if (!tempCtx) return;
+
+              // Установка размеров с учетом поворота
+              const diagonal = Math.sqrt(bodyImg.width * bodyImg.width + bodyImg.height * bodyImg.height);
+              tempCanvas.width = diagonal;
+              tempCanvas.height = diagonal;
+
+              // Рисуем повернутое изображение в центре
+              tempCtx.save();
+              tempCtx.translate(diagonal / 2, diagonal / 2);
+              tempCtx.rotate((rotation * Math.PI) / 180);
+              tempCtx.drawImage(bodyImg, -bodyImg.width / 2, -bodyImg.height / 2);
+              tempCtx.restore();
+
+              // Находим новые размеры повернутого изображения
+              const rotatedWidth = Math.abs(bodyImg.width * Math.cos(rotation * Math.PI / 180)) + 
+                                   Math.abs(bodyImg.height * Math.sin(rotation * Math.PI / 180));
+              const rotatedHeight = Math.abs(bodyImg.width * Math.sin(rotation * Math.PI / 180)) + 
+                                    Math.abs(bodyImg.height * Math.cos(rotation * Math.PI / 180));
+
+              // Масштабируем с учетом соотношения сторон
+              const imgRatio = rotatedWidth / rotatedHeight;
+              const scaledWidth = bodyWidth;
+              const scaledHeight = scaledWidth / imgRatio;
+
+              // Применяем пользовательский масштаб
+              const finalScaledHeight = scaledHeight * scale;
+              
               if (startFrom === 'fill') {
-                const tileHeight = scaledHeight * 0.98; // 2% перекрытие
-                const numTiles = Math.max(1, Math.ceil(bodyHeight / tileHeight));
-                const adjustedTileHeight = bodyHeight / numTiles + (scaledHeight * 0.02);
-
-                for (let j = 0; j < numTiles; j++) {
+                // Режим заполнения с сохранением тайлов
+                
+                // Вычисляем, сколько целых тайлов поместится по высоте с учетом нахлёста
+                const visibleTileHeight = finalScaledHeight * (1 - overlap);
+                const numTilesFloat = bodyHeight / visibleTileHeight;
+                const numTiles = Math.floor(numTilesFloat); // Округляем вниз для целого числа тайлов
+                
+                if (numTiles <= 1) {
+                  // Если помещается только один тайл или меньше, масштабируем изображение по высоте
                   bufferCtx.drawImage(
-                    bodyImg,
-                    x + (barConfig.body?.offsetX || 0),
-                    bodyY + j * (adjustedTileHeight - scaledHeight * 0.02),
+                    tempCanvas,
+                    (tempCanvas.width - rotatedWidth) / 2,
+                    (tempCanvas.height - rotatedHeight) / 2,
+                    rotatedWidth,
+                    rotatedHeight,
+                    x + offsetX * lineScale / barScale,
+                    bodyY,
                     bodyWidth,
-                    adjustedTileHeight
+                    bodyHeight
                   );
+                } else {
+                  // Если помещается больше одного тайла, распределяем их равномерно
+                  
+                  // Вычисляем фактическую высоту всех тайлов с учетом нахлёста
+                  const totalTilesHeight = numTiles * finalScaledHeight - (numTiles - 1) * (finalScaledHeight * overlap);
+                  
+                  // Масштабируем все тайлы вместе, чтобы заполнить всю высоту бара
+                  const scaleFactor = bodyHeight / totalTilesHeight;
+                  const adjustedTileHeight = finalScaledHeight * scaleFactor;
+                  
+                  // Рисуем тайлы с масштабированием в зависимости от типа бара
+                  for (let j = 0; j < numTiles; j++) {
+                    let tileIndex = j;
+                    
+                    // Для candle и up заполнение снизу вверх (обратный порядок тайлов)
+                    if (fillDirection === 'bottom-to-top') {
+                      tileIndex = numTiles - j - 1;
+                    }
+                    
+                    const tileY = bodyY + tileIndex * adjustedTileHeight * (1 - overlap);
+                    
+                    bufferCtx.drawImage(
+                      tempCanvas,
+                      (tempCanvas.width - rotatedWidth) / 2,
+                      (tempCanvas.height - rotatedHeight) / 2,
+                      rotatedWidth,
+                      rotatedHeight,
+                      x + offsetX * lineScale / barScale,
+                      tileY,
+                      bodyWidth,
+                      adjustedTileHeight
+                    );
+                  }
                 }
               } else {
-                const repetitions = Math.ceil(bodyHeight / (scaledHeight * 0.98)) + 1;
-                let currentY = startFrom === 'top' ? bodyY : bodyY + bodyHeight - scaledHeight;
-
-                for (let j = 0; j < repetitions; j++) {
-                  if (startFrom === 'top' && currentY + scaledHeight > bodyY + bodyHeight) {
-                    const remainingHeight = bodyY + bodyHeight - currentY;
-                    bufferCtx.drawImage(
-                      bodyImg,
-                      0, 0,
-                      bodyImg.width, bodyImg.height * (remainingHeight / scaledHeight),
-                      x + (barConfig.body?.offsetX || 0), currentY,
-                      bodyWidth, remainingHeight
-                    );
-                    break;
-                  } else if (startFrom === 'bottom' && currentY < bodyY) {
-                    const remainingHeight = scaledHeight - (bodyY - currentY);
-                    bufferCtx.drawImage(
-                      bodyImg,
-                      0, bodyImg.height - (bodyImg.height * (remainingHeight / scaledHeight)),
-                      bodyImg.width, bodyImg.height * (remainingHeight / scaledHeight),
-                      x + (barConfig.body?.offsetX || 0), bodyY,
-                      bodyWidth, remainingHeight
-                    );
-                    break;
+                // Режим тайлинга (top или bottom) с учетом типа бара и опции startFrom
+                
+                // Вычисляем высоту видимой части тайла (без нахлёста)
+                const visibleTileHeight = finalScaledHeight * (1 - overlap);
+                
+                // Вычисляем количество тайлов, необходимое для заполнения высоты бара
+                const numTilesFloat = bodyHeight / visibleTileHeight;
+                const numTiles = Math.ceil(numTilesFloat);
+                
+                // Вычисляем общую высоту всех тайлов с учетом нахлёста
+                const totalHeight = numTiles * finalScaledHeight - (numTiles - 1) * (finalScaledHeight * overlap);
+                
+                // Определяем смещение в зависимости от опции startFrom и типа бара
+                let verticalOffset = 0;
+                
+                // Направление отрисовки: приоритет у типа бара (candle/up снизу вверх, down/knife сверху вниз)
+                const drawDirection = fillDirection;
+                
+                // Привязка начала (и смещение) исходя из опции startFrom
+                if (startFrom === 'top') {
+                  // При startFrom = top, верхний тайл начинается от верхней границы бара
+                  verticalOffset = 0;
+                } else if (startFrom === 'bottom') {
+                  // При startFrom = bottom, нижний тайл начинается от нижней границы бара
+                  verticalOffset = totalHeight - bodyHeight;
+                } else {
+                  // Центрирование (если вдруг появятся новые опции)
+                  verticalOffset = (totalHeight - bodyHeight) / 2;
+                }
+                
+                // Рендерим тайлы с учетом направления отрисовки и привязки начала
+                for (let j = 0; j < numTiles; j++) {
+                  let tileIndex = j;
+                  
+                  // Направление отрисовки (снизу вверх или сверху вниз) определяется типом бара
+                  if (drawDirection === 'bottom-to-top') {
+                    tileIndex = numTiles - j - 1;
                   }
-
+                  
+                  // Начальная позиция первого тайла в зависимости от привязки
+                  let tileY;
+                  if (startFrom === 'top') {
+                    // Для top - первый тайл начинается от верхней границы (bodyY)
+                    tileY = bodyY + tileIndex * finalScaledHeight * (1 - overlap);
+                  } else if (startFrom === 'bottom') {
+                    // Для bottom - последний тайл заканчивается у нижней границы (bodyY + bodyHeight)
+                    const bottomPos = bodyY + bodyHeight;
+                    tileY = bottomPos - finalScaledHeight - tileIndex * finalScaledHeight * (1 - overlap);
+                  } else {
+                    // Центрирование (для возможных будущих опций)
+                    tileY = bodyY - verticalOffset + tileIndex * finalScaledHeight * (1 - overlap);
+                  }
+                  
+                  // Пропускаем тайлы, которые полностью находятся за пределами видимой области
+                  if (tileY + finalScaledHeight < bodyY || tileY > bodyY + bodyHeight) {
+                    continue;
+                  }
+                  
+                  // Вычисляем часть изображения, которую нужно отрисовать
+                  let sourceY = (tempCanvas.height - rotatedHeight) / 2;
+                  let sourceHeight = rotatedHeight;
+                  let destY = tileY;
+                  let destHeight = finalScaledHeight;
+                  
+                  // Если тайл выходит за верхнюю границу бара, обрезаем его сверху
+                  // Но не обрезаем, если это первый тайл при startFrom = top
+                  if (destY < bodyY && !(startFrom === 'top' && 
+                      ((drawDirection === 'top-to-bottom' && j === 0) || 
+                       (drawDirection === 'bottom-to-top' && j === numTiles - 1)))) {
+                    const clipTop = bodyY - destY;
+                    const sourceClipRatio = clipTop / destHeight;
+                    sourceY += sourceHeight * sourceClipRatio;
+                    sourceHeight -= sourceHeight * sourceClipRatio;
+                    destHeight -= clipTop;
+                    destY = bodyY;
+                  }
+                  
+                  // Если тайл выходит за нижнюю границу бара, обрезаем его снизу
+                  // Но не обрезаем, если это последний тайл при startFrom = bottom
+                  if (destY + destHeight > bodyY + bodyHeight && !(startFrom === 'bottom' && 
+                      ((drawDirection === 'top-to-bottom' && j === numTiles - 1) || 
+                       (drawDirection === 'bottom-to-top' && j === 0)))) {
+                    const clipBottom = (destY + destHeight) - (bodyY + bodyHeight);
+                    const sourceClipRatio = clipBottom / destHeight;
+                    sourceHeight -= sourceHeight * sourceClipRatio;
+                    destHeight -= clipBottom;
+                  }
+                  
+                  // Отрисовываем тайл с учетом всех вычисленных параметров
                   bufferCtx.drawImage(
-                    bodyImg,
-                    x + (barConfig.body?.offsetX || 0),
-                    currentY,
+                    tempCanvas,
+                    (tempCanvas.width - rotatedWidth) / 2,
+                    sourceY,
+                    rotatedWidth,
+                    sourceHeight,
+                    x + offsetX * lineScale / barScale,
+                    destY,
                     bodyWidth,
-                    scaledHeight
+                    destHeight
                   );
-
-                  currentY += startFrom === 'top' ? (scaledHeight * 0.98) : -(scaledHeight * 0.98);
                 }
               }
             } catch (error) {
@@ -345,16 +485,26 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
                 const scale = (imgConfig.scale || 1) * lineScale / barScale;
                 const offsetX = (imgConfig.offsetX || 0) * lineScale / barScale;
                 const offsetY = (imgConfig.offsetY || 0) * lineScale / barScale;
+                const rotation = imgConfig.rotation || 0;
                 const scaledWidth = img.width * scale;
                 const scaledHeight = img.height * scale;
                 
+                bufferCtx.save();
+                // Перемещаем точку вращения в центр изображения
+                const centerX = x + (barWidth - scaledWidth) / 2 + offsetX + scaledWidth / 2;
+                const centerY = part === 'top' ? Math.min(y_open, y_close) - scaledHeight + offsetY + scaledHeight / 2 : Math.max(y_open, y_close) + offsetY + scaledHeight / 2;
+                bufferCtx.translate(centerX, centerY);
+                bufferCtx.rotate((rotation * Math.PI) / 180);
+                bufferCtx.translate(-scaledWidth / 2, -scaledHeight / 2);
+                
                 bufferCtx.drawImage(
                   img,
-                  x + (barWidth - scaledWidth) / 2 + offsetX,
-                  part === 'top' ? Math.min(y_open, y_close) - scaledHeight + offsetY : Math.max(y_open, y_close) + offsetY,
+                  0,
+                  0,
                   scaledWidth,
                   scaledHeight
                 );
+                bufferCtx.restore();
               } catch (error) {
                 console.error(`Error loading ${part} image:`, error);
               }
@@ -369,16 +519,26 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
             const scale = (imgConfig.scale || 1) * lineScale / barScale;
             const offsetX = (imgConfig.offsetX || 0) * lineScale / barScale;
             const offsetY = (imgConfig.offsetY || 0) * lineScale / barScale;
+            const rotation = imgConfig.rotation || 0;
             const scaledWidth = img.width * scale;
             const scaledHeight = img.height * scale;
 
+            bufferCtx.save();
+            // Перемещаем точку вращения в центр изображения
+            const centerX = x + (barWidth - scaledWidth) / 2 + offsetX + scaledWidth / 2;
+            const centerY = y - scaledHeight / 2 + offsetY + scaledHeight / 2;
+            bufferCtx.translate(centerX, centerY);
+            bufferCtx.rotate((rotation * Math.PI) / 180);
+            bufferCtx.translate(-scaledWidth / 2, -scaledHeight / 2);
+
             bufferCtx.drawImage(
               img,
-              x + (barWidth - scaledWidth) / 2 + offsetX,
-              y - scaledHeight / 2 + offsetY,
+              0,
+              0,
               scaledWidth,
               scaledHeight
             );
+            bufferCtx.restore();
           } catch (error) {
             console.error('Error loading center image:', error);
           }

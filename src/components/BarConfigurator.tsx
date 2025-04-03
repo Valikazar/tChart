@@ -119,6 +119,8 @@ const ImageSection = ({ type, config, barType, onImageClick, onImageDrop, onImag
             offsetY={type === 'body' ? 0 : (imageConfig.offsetY || 0)}
             startFrom={type === 'body' ? (imageConfig.startFrom || 'top') : undefined}
             isBody={type === 'body'}
+            rotation={imageConfig.rotation || 0}
+            overlap={type === 'body' ? (imageConfig.overlap || 2) : undefined}
             onScaleChange={(newScale) => {
               onImageSettingsUpdate(barType, type, {
                 ...imageConfig,
@@ -143,6 +145,18 @@ const ImageSection = ({ type, config, barType, onImageClick, onImageDrop, onImag
               onImageSettingsUpdate(barType, type, {
                 ...imageConfig,
                 startFrom: newStartFrom,
+              });
+            } : undefined}
+            onRotationChange={(newRotation) => {
+              onImageSettingsUpdate(barType, type, {
+                ...imageConfig,
+                rotation: newRotation,
+              });
+            }}
+            onOverlapChange={type === 'body' ? (newOverlap) => {
+              onImageSettingsUpdate(barType, type, {
+                ...imageConfig,
+                overlap: newOverlap,
               });
             } : undefined}
           />

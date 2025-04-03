@@ -8,10 +8,14 @@ interface ImageSettingsProps {
   offsetY: number;
   startFrom?: 'top' | 'bottom' | 'fill';
   isBody?: boolean;
+  rotation?: number;
+  overlap?: number;
   onScaleChange: (scale: number) => void;
   onOffsetXChange: (offsetX: number) => void;
   onOffsetYChange: (offsetY: number) => void;
   onStartFromChange?: (startFrom: 'top' | 'bottom' | 'fill') => void;
+  onRotationChange?: (rotation: number) => void;
+  onOverlapChange?: (overlap: number) => void;
 }
 
 const ImageSettings: React.FC<ImageSettingsProps> = ({
@@ -20,10 +24,14 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
   offsetY,
   startFrom = 'top',
   isBody = false,
+  rotation = 0,
+  overlap = 2,
   onScaleChange,
   onOffsetXChange,
   onOffsetYChange,
   onStartFromChange,
+  onRotationChange,
+  onOverlapChange,
 }) => {
   return (
     <Box>
@@ -56,6 +64,21 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
           </FormControl>
         </Box>
       )}
+      {isBody && onOverlapChange && (
+        <Box sx={{ mb: 1, minWidth: '200px' }}>
+          <Typography variant="caption" gutterBottom>
+            Overlap (%)
+          </Typography>
+          <SliderWithInput
+            value={overlap}
+            onChange={onOverlapChange}
+            min={0}
+            max={50}
+            step={1}
+            isFloat={false}
+          />
+        </Box>
+      )}
       <Box sx={{ mb: 1, minWidth: '200px' }}>
         <Typography variant="caption" gutterBottom>
           X Offset
@@ -78,6 +101,20 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
             onChange={onOffsetYChange}
             min={-100}
             max={100}
+            step={1}
+          />
+        </Box>
+      )}
+      {onRotationChange && (
+        <Box sx={{ mb: 1, minWidth: '200px' }}>
+          <Typography variant="caption" gutterBottom>
+            Rotation
+          </Typography>
+          <SliderWithInput
+            value={rotation}
+            onChange={onRotationChange}
+            min={-180}
+            max={180}
             step={1}
           />
         </Box>
