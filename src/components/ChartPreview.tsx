@@ -67,6 +67,7 @@ interface ChartPreviewProps {
   id?: string;
   tokenName?: string;
   isPreview?: boolean;
+  showTokenInfo?: boolean;
 }
 
 /**
@@ -81,7 +82,8 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
   height = 1280,
   id = 'chart-canvas',
   tokenName,
-  isPreview = false
+  isPreview = false,
+  showTokenInfo = true
 }) => {
   // Используем демо данные для превью или если не переданы реальные данные
   const chartData = useMemo(() => (isPreview || !data || data.length === 0) ? DEMO_DATA : data, [data, isPreview]);
@@ -788,7 +790,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
           transition: 'opacity 0.3s ease-in-out'
         }}
       />
-      {!isPreview && chartTokenInfo && (
+      {!isPreview && chartTokenInfo && showTokenInfo && (
         <Box sx={{ mt: 2 }}>
           <Typography variant="subtitle1" gutterBottom>
             Token Info:

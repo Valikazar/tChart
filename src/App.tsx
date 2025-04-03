@@ -270,7 +270,7 @@ const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="xl">
+      <Container maxWidth="xl" sx={{ transform: { lg: 'scale(0.8)', md: 'none', xs: 'none' }, transformOrigin: 'top center' }}>
         <Typography variant="h3" component="h1" gutterBottom align="center" sx={{ mt: 4, mb: 2 }}>
           tChart Constructor
         </Typography>
@@ -301,6 +301,7 @@ const App: React.FC = () => {
             <ChartPreview
               config={config}
               data={ohlcvData}
+              showTokenInfo={false}
             />
           </Box>
           <Box sx={{ 
