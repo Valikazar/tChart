@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Box, Grid, TextField, Select, MenuItem, Button, FormControl, InputLabel, Typography } from '@mui/material';
 import { Network, ChartGeneratorParams, TokenInfo, ChartConfig } from '../types';
 import ChartPreview from './ChartPreview';
-import { generateData } from '../utils/dataGenerator';
 
 interface ChartGeneratorProps {
   config: ChartConfig;
@@ -192,11 +191,6 @@ const ChartGenerator: React.FC<ChartGeneratorProps> = ({ config, onExport, onImp
       console.error('Token info error:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch token info');
     }
-  };
-
-  const handleGenerate = () => {
-    const newData = generateData(20);
-    setIsGenerated(true);
   };
 
   const handleDownloadPNG = () => {

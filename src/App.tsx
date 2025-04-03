@@ -102,7 +102,26 @@ const App: React.FC = () => {
       })
       .then(data => {
         if (data?.data?.attributes?.ohlcv_list) {
-          setOhlcvData(data.data.attributes.ohlcv_list);
+          // Получаем текущее время в секундах
+          const now = Math.floor(Date.now() / 1000);
+          
+          // Получаем исходные данные
+          const originalData = data.data.attributes.ohlcv_list;
+          
+          // Распределяем данные равномерно по временным меткам: 24ч, 18ч, 12ч, 6ч назад и текущее время
+          const modifiedData = originalData.map((bar, index, array) => {
+            // Вычисляем относительную позицию от 0 до 1
+            const relativePosition = index / (array.length - 1);
+            
+            // Вычисляем временную метку (в секундах)
+            // 24 часа = 86400 секунд
+            const hours = 24 - (relativePosition * 24);
+            const newTimestamp = now - Math.round(hours * 3600);
+            
+            return [newTimestamp, bar[1], bar[2], bar[3], bar[4], bar[5]];
+          });
+          
+          setOhlcvData(modifiedData);
         }
       })
       .catch(error => {

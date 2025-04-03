@@ -7,7 +7,8 @@ const imageCache = new Map<string, HTMLImageElement>();
 
 // Демо-данные для превью
 const DEMO_DATA = Array.from({ length: 24 }, (_, i) => {
-  const timestamp = Math.floor(Date.now() / 1000) - (24 - i) * 3600;
+  const now = Math.floor(Date.now() / 1000);
+  const timestamp = now - (24 - i) * 3600; // Каждый элемент с интервалом в 1 час, начиная с 24 часа назад
   const basePrice = 0.00000450;
   const volatility = 0.00000050;
   const open = basePrice + (Math.random() - 0.5) * volatility;
