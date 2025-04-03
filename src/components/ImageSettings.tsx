@@ -10,12 +10,14 @@ interface ImageSettingsProps {
   isBody?: boolean;
   rotation?: number;
   overlap?: number;
+  hue?: number;
   onScaleChange: (scale: number) => void;
   onOffsetXChange: (offsetX: number) => void;
   onOffsetYChange: (offsetY: number) => void;
   onStartFromChange?: (startFrom: 'top' | 'bottom' | 'fill') => void;
   onRotationChange?: (rotation: number) => void;
   onOverlapChange?: (overlap: number) => void;
+  onHueChange?: (hue: number) => void;
 }
 
 const ImageSettings: React.FC<ImageSettingsProps> = ({
@@ -26,12 +28,14 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
   isBody = false,
   rotation = 0,
   overlap = 2,
+  hue = 0,
   onScaleChange,
   onOffsetXChange,
   onOffsetYChange,
   onStartFromChange,
   onRotationChange,
   onOverlapChange,
+  onHueChange,
 }) => {
   return (
     <Box>
@@ -48,6 +52,21 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
           isFloat={true}
         />
       </Box>
+      {onHueChange && (
+        <Box sx={{ mb: 1, minWidth: '200px' }}>
+          <Typography variant="caption" gutterBottom>
+            Color Balance
+          </Typography>
+          <SliderWithInput
+            value={hue}
+            onChange={onHueChange}
+            min={0}
+            max={360}
+            step={1}
+            isFloat={false}
+          />
+        </Box>
+      )}
       {isBody && onStartFromChange && (
         <Box sx={{ mb: 1, minWidth: '200px' }}>
           <FormControl fullWidth size="small">

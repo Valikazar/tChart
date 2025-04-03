@@ -4,6 +4,82 @@ import { ChartConfig, ExtendedBarConfig } from '../types';
 
 // Кэш для изображений
 const imageCache = new Map<string, HTMLImageElement>();
+// Cache for images with applied color balance
+const hueImageCache = new Map<string, HTMLCanvasElement>();
+
+// Function for applying color balance to image
+const applyHueToImage = (img: HTMLImageElement, hue: number): HTMLCanvasElement => {
+  // Create a unique key for hue cache
+  const cacheKey = `${img.src}_hue_${hue}`;
+  
+  // Check if such image already exists in cache
+  if (hueImageCache.has(cacheKey)) {
+    return hueImageCache.get(cacheKey)!;
+  }
+  
+  // Create temporary canvas for filter application
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = img.width;
+  tempCanvas.height = img.height;
+  const tempCtx = tempCanvas.getContext('2d')!;
+  
+  // Draw original image
+  tempCtx.drawImage(img, 0, 0);
+  
+  // If hue is not specified or equals 0, return original image
+  if (!hue) {
+    hueImageCache.set(cacheKey, tempCanvas);
+    return tempCanvas;
+  }
+  
+  // Get image data
+  const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+  const data = imageData.data;
+  
+  // Convert hue value to RGB color
+  // We'll use hue in range 0-360 to generate a color
+  const hueRadian = hue * Math.PI / 180;
+  
+  // Calculate color to blend based on hue angle (using color wheel)
+  const colorToBlend = {
+    r: Math.round(127.5 * (1 + Math.cos(hueRadian))),
+    g: Math.round(127.5 * (1 + Math.cos(hueRadian - 2 * Math.PI / 3))),
+    b: Math.round(127.5 * (1 + Math.cos(hueRadian - 4 * Math.PI / 3)))
+  };
+  
+  // Apply color blend to each pixel, including white and gray
+  for (let i = 0; i < data.length; i += 4) {
+    // Skip fully transparent pixels
+    if (data[i + 3] === 0) continue;
+    
+    // Get original RGB values
+    const originalR = data[i];
+    const originalG = data[i + 1];
+    const originalB = data[i + 2];
+    
+    // Calculate blend factor based on luminance
+    const luminance = 0.299 * originalR + 0.587 * originalG + 0.114 * originalB;
+    const normalizedLuminance = luminance / 255;
+    
+    // Higher blend factor for brighter pixels, so white and gray are affected more
+    // This ensures white/gray get more color than darker pixels
+    const baseFactor = 0.1; // Base blend amount
+    const brightnessFactor = Math.pow(normalizedLuminance, 0.5) * 0.5; // More effect on bright pixels
+    const blendFactor = Math.min(baseFactor + brightnessFactor, 0.8); // Cap at 80% to preserve some original
+    
+    // Blend the original color with the hue color
+    data[i] = Math.round(originalR * (1 - blendFactor) + colorToBlend.r * blendFactor);
+    data[i + 1] = Math.round(originalG * (1 - blendFactor) + colorToBlend.g * blendFactor);
+    data[i + 2] = Math.round(originalB * (1 - blendFactor) + colorToBlend.b * blendFactor);
+  }
+  
+  // Apply updated data back to canvas
+  tempCtx.putImageData(imageData, 0, 0);
+  
+  // Save to cache and return
+  hueImageCache.set(cacheKey, tempCanvas);
+  return tempCanvas;
+};
 
 // Демо-данные для превью
 const DEMO_DATA = Array.from({ length: 24 }, (_, i) => {
@@ -114,6 +190,8 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+      // Clear cache of images with applied color balance on component unmount
+      hueImageCache.clear();
     };
   }, []);
 
@@ -252,6 +330,10 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
               const offsetX = barConfig.body?.offsetX || 0;
               const startFrom = barConfig.body?.startFrom || 'top';
               const overlap = barConfig.body?.overlap !== undefined ? barConfig.body.overlap / 100 : 0.02;
+              const hue = barConfig.body?.hue || 0;
+
+              // Apply color balance to image if specified
+              const processedImg = hue ? applyHueToImage(bodyImg, hue) : bodyImg;
 
               // Создаем временный канвас для поворота изображения
               const tempCanvas = document.createElement('canvas');
@@ -267,7 +349,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
               tempCtx.save();
               tempCtx.translate(diagonal / 2, diagonal / 2);
               tempCtx.rotate((rotation * Math.PI) / 180);
-              tempCtx.drawImage(bodyImg, -bodyImg.width / 2, -bodyImg.height / 2);
+              tempCtx.drawImage(processedImg, -bodyImg.width / 2, -bodyImg.height / 2);
               tempCtx.restore();
 
               // Находим новые размеры повернутого изображения
@@ -489,6 +571,11 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
                 const offsetX = (imgConfig.offsetX || 0) * lineScale / barScale;
                 const offsetY = (imgConfig.offsetY || 0) * lineScale / barScale;
                 const rotation = imgConfig.rotation || 0;
+                const hue = imgConfig.hue || 0;
+                
+                // Apply color balance to image if specified
+                const processedImg = hue ? applyHueToImage(img, hue) : img;
+                
                 const scaledWidth = img.width * scale;
                 const scaledHeight = img.height * scale;
                 
@@ -501,7 +588,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
                 bufferCtx.translate(-scaledWidth / 2, -scaledHeight / 2);
                 
                 bufferCtx.drawImage(
-                  img,
+                  processedImg,
                   0,
                   0,
                   scaledWidth,
@@ -523,6 +610,11 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
             const offsetX = (imgConfig.offsetX || 0) * lineScale / barScale;
             const offsetY = (imgConfig.offsetY || 0) * lineScale / barScale;
             const rotation = imgConfig.rotation || 0;
+            const hue = imgConfig.hue || 0;
+            
+            // Apply color balance to image if specified
+            const processedImg = hue ? applyHueToImage(img, hue) : img;
+            
             const scaledWidth = img.width * scale;
             const scaledHeight = img.height * scale;
 
@@ -535,7 +627,7 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
             bufferCtx.translate(-scaledWidth / 2, -scaledHeight / 2);
 
             bufferCtx.drawImage(
-              img,
+              processedImg,
               0,
               0,
               scaledWidth,

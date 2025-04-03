@@ -121,6 +121,7 @@ const ImageSection = ({ type, config, barType, onImageClick, onImageDrop, onImag
             isBody={type === 'body'}
             rotation={imageConfig.rotation || 0}
             overlap={type === 'body' ? (imageConfig.overlap || 2) : undefined}
+            hue={imageConfig.hue || 0}
             onScaleChange={(newScale) => {
               onImageSettingsUpdate(barType, type, {
                 ...imageConfig,
@@ -159,6 +160,12 @@ const ImageSection = ({ type, config, barType, onImageClick, onImageDrop, onImag
                 overlap: newOverlap,
               });
             } : undefined}
+            onHueChange={(newHue) => {
+              onImageSettingsUpdate(barType, type, {
+                ...imageConfig,
+                hue: newHue,
+              });
+            }}
           />
         </Box>
       )}
@@ -189,7 +196,8 @@ const BarConfigurator: React.FC<BarConfiguratorProps> = ({
       scale: number; 
       offsetX: number; 
       offsetY: number; 
-      startFrom?: 'top' | 'bottom' 
+      startFrom?: 'top' | 'bottom' | 'fill';
+      hue?: number;
     }
   ) => {
     return (
@@ -216,6 +224,7 @@ const BarConfigurator: React.FC<BarConfiguratorProps> = ({
               offsetY={settings.offsetY}
               startFrom={settings.startFrom}
               isBody={partType === 'body'}
+              hue={settings.hue || 0}
               onScaleChange={(scale) =>
                 onImageSettingsUpdate(barType, partType, {
                   ...settings,
@@ -240,6 +249,12 @@ const BarConfigurator: React.FC<BarConfiguratorProps> = ({
                   startFrom,
                 })
               : undefined}
+              onHueChange={(hue) =>
+                onImageSettingsUpdate(barType, partType, {
+                  ...settings,
+                  hue,
+                })
+              }
             />
           )}
         </Collapse>

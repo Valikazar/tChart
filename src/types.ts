@@ -8,7 +8,8 @@ export interface ImageConfig {
   offsetY?: number;
   startFrom?: 'top' | 'bottom' | 'fill';
   rotation?: number;
-  overlap?: number; // процент нахлёста при тайлинге (0-99)
+  overlap?: number; // overlap percentage for tiling (0-99)
+  hue?: number; // color balance value in degrees (0-360)
 }
 
 export interface BackgroundConfig {
