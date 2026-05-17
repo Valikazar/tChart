@@ -1,65 +1,223 @@
-/* Объявляем шрифты из каталога fonts */
+/* Declare fonts from the fonts directory with font-display: swap for better performance */
 @font-face {
   font-family: 'Rich Eatin';
-  src: url('../fonts/Rich Eatin\'.otf') format('opentype');
+  src: url('../fonts/RichEatin.ttf') format('opentype');
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Computer Speak';
-  src: url('../fonts/Computer Speak v0.3.ttf') format('truetype');
+  src: url('../fonts/Computer-Speak.otf') format('truetype');
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Idealist Sans';
   src: url('../fonts/idealist-sans.light.ttf') format('truetype');
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Komi';
   src: url('../fonts/Komi.ttf') format('truetype');
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Blogger Sans';
   src: url('../fonts/Blogger Sans.otf') format('opentype');
+  font-display: swap;
 }
 
 @font-face {
-  font-family: 'Crystal';
+  font-family: 'CRYSTAL';
   src: url('../fonts/CRYSTAL-Regular.ttf') format('truetype');
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'GetVoIP Grotesque';
   src: url('../fonts/GetVoIP Grotesque.ttf') format('truetype');
+  font-display: swap;
 }
 
 @font-face {
-  font-family: 'Robotech GP';
+  font-family: 'ROBOTECH GP';
   src: url('../fonts/ROBOTECH GP.ttf') format('truetype');
+  font-display: swap;
 }
 
 @font-face {
-  font-family: 'Anita Semi Square';
-  src: url('../fonts/Anita semi square.ttf') format('truetype');
+  font-family: 'Anita Semi-square';
+  src: url('../fonts/AnitaSemi-square.otf') format('truetype');
+  font-display: swap;
 }
 
 @font-face {
-  font-family: 'Garoa Hacker';
+  font-family: 'Garoa Hacker Clube';
   src: url('../fonts/GaroaHackerClubeBold.otf') format('opentype');
-}
-
-@font-face {
-  font-family: 'Extra';
-  src: url('../fonts/extrast9.ttf') format('truetype');
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Anarchy Sans';
   src: url('../fonts/AnarchySans.otf') format('opentype');
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Keenton';
   src: url('../fonts/Keenton.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* New fonts from fonts/new directory */
+@font-face {
+  font-family: 'Audiowide';
+  src: url('../fonts/new/Audiowide-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Glitch Goblin';
+  src: url('../fonts/new/GlitchGoblin-2O87v.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Gridtile';
+  src: url('../fonts/new/Gridtile-8Ojnz.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Harry P';
+  src: url('../fonts/new/HarryP-MVZ6w.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Home Video';
+  src: url('../fonts/new/HomeVideo-Bold.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LIBRARY 3 AM';
+  src: url('../fonts/new/Library3am-5V3Z.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lofty Goals';
+  src: url('../fonts/new/LoftygoalsRegular-9Y5Xy.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MatrixType';
+  src: url('../fonts/new/Matrixtype-lxMZX.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Minecraft';
+  src: url('../fonts/new/Minecraft-Bold.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mountain King';
+  src: url('../fonts/new/MountainKingRegular-woBYn.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'New Walt Disney UI';
+  src: url('../fonts/new/NewWaltDisneyUi-8YdA.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pixelated Elegance';
+  src: url('../fonts/new/PixelatedEleganceRegular-ovyAA.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Procrastinating Pixie';
+  src: url('../fonts/new/ProcrastinatingPixie-WyVOO.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roblox Font';
+  src: url('../fonts/new/RobloxFont.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'RO twimch';
+  src: url('../fonts/new/RoTwimchRegular-WyR3n.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Ryga';
+  src: url('../fonts/new/RygaRegular-9Mrwn.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sparky Stones';
+  src: url('../fonts/new/SparkyStonesRegular-BW6ld.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Star Jedi Hollow';
+  src: url('../fonts/new/StarJediHollow-A4lL.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Super Crafty';
+  src: url('../fonts/new/SuperCrafty-vngrE.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Super Funky';
+  src: url('../fonts/new/SuperFunky-lgmWw.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Super Mystery';
+  src: url('../fonts/new/SuperMystery-BLG4x.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Super Shiny';
+  src: url('../fonts/new/SuperShiny-0v0rG.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Taurus Mono Outline';
+  src: url('../fonts/new/Taurusmonooutline-p7gjZ.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Wkwk';
+  src: url('../fonts/new/Wkwk-2O988.otf') format('opentype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'X Company';
+  src: url('../fonts/new/XCompany-GOR9y.ttf') format('truetype');
+  font-display: swap;
 } 

@@ -1,0 +1,122 @@
+{
+  "background": {
+    "color": "#000000",
+    "opacity": 0.76,
+    "image": {
+      "url": "https://tchart.xyz/pic/bg/patterns/pngimg.com - happy_birthday_PNG47.png",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    }
+  },
+  "overlay": {
+    "color": "#000000"
+  },
+  "font": {
+    "family": "GetVoIP Grotesque",
+    "size": 40,
+    "color": "#ffffff"
+  },
+  "display": {
+    "showMarketCap": false,
+    "showPrice": true,
+    "showTimeline": true,
+    "showPriceChange": true,
+    "showTokenName": true,
+    "showMinMax": false
+  },
+  "upBar": {
+    "color": "#26a69a",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF",
+    "top": {
+      "url": "https://tchart.xyz/pic/topbot/Holiday/balloon_03.png",
+      "scale": 0.25,
+      "offsetX": 0,
+      "offsetY": 29
+    }
+  },
+  "downBar": {
+    "color": "#ef5350",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF",
+    "top": {
+      "url": "https://tchart.xyz/pic/topbot/Holiday/balloon_02.png",
+      "scale": 0.3,
+      "offsetX": 0,
+      "offsetY": 29
+    }
+  },
+  "candle": {
+    "color": "#00ff00",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF",
+    "body": {
+      "url": "https://tchart.xyz/pic/body/Holiday/candle_02.png",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "startFrom": "top",
+      "overlap": 1
+    },
+    "bottom": {
+      "url": "https://tchart.xyz/pic/topbot/Holiday/cake.png",
+      "scale": 0.7,
+      "offsetX": -4,
+      "offsetY": -73
+    },
+    "top": {
+      "url": "https://tchart.xyz/pic/topbot/Holiday/candle_fire_02.png",
+      "scale": 0.35,
+      "offsetX": 9,
+      "offsetY": 2
+    }
+  },
+  "knife": {
+    "color": "#FF0700",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF",
+    "top": {
+      "url": "https://tchart.xyz/pic/topbot/Holiday/candle_fire_01.png",
+      "scale": 0.45,
+      "offsetX": 0,
+      "offsetY": 1
+    },
+    "body": {
+      "url": "https://tchart.xyz/pic/body/Holiday/candle_01.png",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0,
+      "startFrom": "top"
+    },
+    "bottom": {
+      "url": "https://tchart.xyz/pic/topbot/Holiday/cake.png",
+      "scale": 0.55,
+      "offsetX": 0,
+      "offsetY": -59
+    },
+    "center": {
+      "url": "https://tchart.xyz/pic/center/Characters/tryan_hold.png",
+      "scale": 0.15,
+      "offsetX": -5,
+      "offsetY": 0,
+      "rotation": 180
+    }
+  },
+  "network": "polygon",
+  "poolAddress": "0xa374094527e1673a86de625aa59517c5de346d32",
+  "duration": 24,
+  "numBars": 20,
+  "interval": "hour",
+  "minimal_duration": 0.002,
+  "last_poster_time": 1748106078.0557191,
+  "free": false
+}

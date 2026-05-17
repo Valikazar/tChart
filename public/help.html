@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tChartXYZ Bot Help Guide</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #E0E0E0;
+            background-color: #121212;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background-color: #1E1E1E;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            margin-left: 320px;
+            max-width: 900px;
+        }
+        
+        h1 {
+            color: #BB86FC;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3D3D3D;
+        }
+        
+        h2 {
+            color: #03DAC6;
+            margin-top: 40px;
+            border-left: 4px solid #03DAC6;
+            padding-left: 10px;
+        }
+        
+        h3 {
+            color: #CF6679;
+            margin-top: 25px;
+        }
+        
+        a {
+            color: #BB86FC;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .nav-link {
+            display: block;
+            padding: 8px 0;
+            color: #E0E0E0;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: #BB86FC;
+        }
+        
+        .nav-sub-link {
+            display: block;
+            padding: 6px 0 6px 15px;
+            font-size: 0.9em;
+            color: #A0A0A0;
+        }
+        
+        .nav-sub-link:hover {
+            color: #BB86FC;
+        }
+        
+        code {
+            background-color: #2D2D2D;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background-color: #2D2D2D;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+        
+        img {
+            max-width: 100%;
+            border-radius: 5px;
+            margin: 15px 0;
+            border: 1px solid #444;
+        }
+        
+        .screenshot-placeholder {
+            background-color: #2D2D2D;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            border-radius: 5px;
+            color: #777;
+            border: 1px dashed #777;
+        }
+        
+        .note {
+            background-color: rgba(3, 218, 198, 0.1);
+            border-left: 4px solid #03DAC6;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .warning {
+            background-color: rgba(207, 102, 121, 0.1);
+            border-left: 4px solid #CF6679;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            color: #E0E0E0;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #3D3D3D;
+        }
+        
+        th {
+            background-color: #252525;
+            color: #03DAC6;
+        }
+        
+        tr:hover {
+            background-color: #252525;
+        }
+        
+        .top-link {
+            display: inline-block;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #BB86FC;
+            color: #121212;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        
+        .top-link:hover {
+            opacity: 1;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            background-color: #BB86FC;
+            color: #121212;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(187, 134, 252, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <a href="/" class="nav-link" style="background-color: #BB86FC; color: #121212; padding: 10px; border-radius: 5px; text-align: center; margin-bottom: 20px; display: block;">Back to tChartXYZ Constructor</a>
+            <h2>Contents</h2>
+            <a href="#introduction" class="nav-link">Introduction</a>
+            
+            <a href="#getting-started" class="nav-link">Getting Started (Telegram)</a>
+            <a href="#adding-bot-to-group" class="nav-sub-link">Adding Bot to Group</a>
+            <a href="#admin-permissions" class="nav-sub-link">Admin Permissions</a>
+            <a href="#managing-topics" class="nav-sub-link">Managing Topics</a>
+            
+            <a href="#configuration" class="nav-link">Configuration</a>
+            <a href="#initial-setup" class="nav-sub-link">Initial Setup</a>
+            <a href="#importing-settings" class="nav-sub-link">Importing Settings</a>
+            <a href="#web-editor" class="nav-sub-link">Web Editor Access</a>
+            <a href="#auto-posting" class="nav-sub-link">Auto-posting Setup</a>
+            
+            <a href="#discord-getting-started" class="nav-link">Getting Started (Discord)</a>
+            <a href="#adding-discord-bot" class="nav-sub-link">Adding Bot to Server</a>
+            <a href="#discord-permissions" class="nav-sub-link">Bot Permissions</a>
+            <a href="#discord-commands" class="nav-sub-link">Using Commands</a>
+            
+            <a href="#web-constructor" class="nav-link">Web Constructor</a>
+            <a href="#interface-overview" class="nav-sub-link">Interface Overview</a>
+            <a href="#background-configuration" class="nav-sub-link">Background Configuration</a>
+            <a href="#bar-configuration" class="nav-sub-link">Bar Configuration</a>
+            <a href="#bar-types-patterns" class="nav-sub-link">Bar Types and Image Patterns</a>
+            <a href="#text-settings" class="nav-sub-link">Text Settings</a>
+            <a href="#chart-parameters" class="nav-sub-link">Chart Parameters</a>
+            
+            <a href="#advanced" class="nav-link">Advanced Features</a>
+            <a href="#export-import" class="nav-sub-link">Export/Import</a>
+            <a href="#updating-tg-settings" class="nav-sub-link">Updating Bot Settings</a>
+            <a href="#json-structure" class="nav-sub-link">JSON Structure</a>
+            
+            <a href="#troubleshooting" class="nav-link">Troubleshooting</a>
+            <a href="#faq" class="nav-link">FAQ</a>
+        </div>
+        
+        <div class="main-content">
+            <h1 id="introduction">tChartXYZ Bot User Guide</h1>
+            <p>Welcome to the comprehensive guide for the tChartXYZ Bot, a powerful tool for creating and sharing crypto price charts directly in your Telegram groups. This guide covers everything from adding the bot to your group, configuring it, and using the web constructor to customize your charts.</p>
+            
+            <img src="img/010_look.png" alt="Screenshot showing tChartXYZ Bot interface" class="screenshot">
+            
+            <h2 id="getting-started">Getting Started (Telegram)</h2>
+            <p>Before you can start creating beautiful charts, you need to add the bot to your Telegram group and set up the necessary permissions.</p>
+            
+            <h3 id="adding-bot-to-group">Adding Bot to Group</h3>
+            <p>To add the tChartXYZ Bot to your Telegram group, follow these steps:</p>
+            <ol>
+                <li>Search for <code><a href="https://t.me/tChartXYZ_bot" target="_blank">@tChartXYZ_bot</a></code> in Telegram.</li>
+                <li>Once you find the bot, tap on it to open a direct message.</li>
+                <li>Click "Add to Group" and select the group you want to add it to.</li>
+                <li>After adding the bot, it will send a welcome message to the group with initial instructions.</li>
+            </ol>
+            
+            <img src="img/020_add_bot.png" alt="Screenshot showing how to add tChartXYZ bot to a Telegram group" class="screenshot">
+            
+            <div class="note">
+                <strong>Note:</strong> The bot needs to be an admin in your group to function properly, especially if you want to use the automatic posting feature.
+            </div>
+            
+            <h3 id="admin-permissions">Admin Permissions</h3>
+            <p>To grant admin permissions to the bot:</p>
+            <ol>
+                <li>Go to your group information.</li>
+                <li>Tap "Administrators".</li>
+                <li>Select "Add Administrator".</li>
+                <li>Find the tChartXYZ Bot in the list and tap on it.</li>
+                <li>For basic functionality, the bot needs the following permissions:
+                    <ul>
+                        <li>Delete Messages</li>
+                    </ul>
+                </li>
+                <li>Click "Done, Save" to save the permissions.</li>
+            </ol>
+            
+            <img src="img/030_add_bot_admin.png" alt="Screenshot showing how to grant admin permissions to tChartXYZ bot" class="screenshot">
+            
+            <h3 id="managing-topics">Managing Topics in Groups with Topics Enabled</h3>
+            <p>If your group has topics enabled, you'll need to specify which topic the bot should post in:</p>
+            <ol>
+                <li>Create a new topic specifically for chart updates (e.g., "Price Charts").</li>
+                <li>Make sure the bot has permission to access and post in this topic.</li>
+                <li>When using commands, make sure to use them within the desired topic where you want the charts to appear.</li>
+            </ol>
+            
+            <div class="warning">
+                <strong>Important:</strong> In groups with topics enabled, the bot will post charts in the topic where the command was issued.
+            </div>
+            
+            <h2 id="configuration">Bot Configuration</h2>
+            <p>After adding the bot to your group, you'll need to configure it properly.</p>
+            
+            <h3 id="initial-setup">Initial Setup</h3>
+            <p>When the bot joins your group, it automatically creates a default configuration file. To start using the bot:</p>
+            <ol>
+                <li>Use the <code>/chart</code> command in your group to generate your first chart with default settings.</li>
+                <li>To customize the settings, start a private chat with the bot by clicking on its name.</li>
+                <li>In the private chat, use the <code>/start</code> command. The bot will show you a list of groups where you have admin rights.</li>
+                <li>Select the group you want to configure from the list.</li>
+            </ol>
+            
+            <h3 id="importing-settings">Importing Settings from JSON</h3>
+            <p>If you already have a configuration file, you can import it to quickly set up your bot:</p>
+            <ol>
+                <li>In the private chat with the bot, select your group from the list.</li>
+                <li>Click "Import settings from JSON" button.</li>
+                <li>Send your JSON configuration file to the bot.</li>
+                <li>The bot will confirm successful import.</li>
+            </ol>
+            
+            <div class="note">
+                <strong>Note:</strong> When importing settings, the bot preserves critical fields like the auto-posting schedule.
+            </div>
+            
+            <img src="img/040_json_upload.png" alt="Screenshot showing how to import JSON settings" class="screenshot">
+            
+            <h3 id="web-editor">Accessing the Web Editor</h3>
+            <p>The web editor provides a user-friendly interface for customizing your charts:</p>
+            <ol>
+                <li>In the private chat with the bot, select your group.</li>
+                <li>Click the "Edit in web interface" button.</li>
+                <li>The bot will generate a unique link valid for one hour.</li>
+                <li>Click the "Open Web Editor" button to access the web editor.</li>
+                <li>Make your desired changes in the editor.</li>
+                <li>After making changes, click the "UPDATE TG" button at the top of the interface to save your changes to the bot's configuration.</li>
+            </ol>
+            
+            <img src="img/050_update.png" alt="Screenshot showing how to update settings in web editor" class="screenshot">
+            
+            <h3 id="auto-posting">Setting Up Auto-posting</h3>
+            <p>One of the powerful features of tChartXYZ Bot is the ability to automatically post updated charts at regular intervals:</p>
+            <ol>
+                <li>In the private chat with the bot, select your group.</li>
+                <li>Click "Set auto-post interval".</li>
+                <li>Enter the interval in hours (e.g., 24 for daily posts).</li>
+                <li>Enter 0 to disable auto-posting.</li>
+            </ol>
+            
+            <div class="warning">
+                <strong>Important:</strong> The bot must have admin rights to use the auto-posting feature, and your group must stay active for automatic posting to work.
+            </div>
+            
+            <img src="img/060_interval.png" alt="Screenshot showing auto-posting interval setup" class="screenshot">
+            
+            <h2 id="discord-getting-started">Getting Started (Discord)</h2>
+            <p>The tChartXYZ Bot is also available for Discord servers! This section covers how to add the bot to your Discord server, configure it properly, and start creating beautiful cryptocurrency charts.</p>
+            
+            <h3 id="adding-discord-bot">Adding Bot to Discord Server</h3>
+            <p>To add the tChartXYZ Bot to your Discord server, follow these steps:</p>
+            <ol>
+                <li>Click on this invitation link: <a href="https://discord.com/oauth2/authorize?client_id=1378000611693428848&permissions=2147600384&integration_type=0&scope=bot+applications.commands" target="_blank">Add tChartXYZ Bot to Discord</a></li>
+                <li>Select the Discord server where you want to add the bot from the dropdown menu.</li>
+                <li>Review the requested permissions and click "Authorize".</li>
+                <li>Complete the captcha verification if prompted.</li>
+                <li>The bot will join your server and send a welcome message.</li>
+            </ol>
+            
+            <img src="img/dc_10.png" alt="Discord Bot Authorization Screen" class="screenshot">
+            <img src="img/dc_20.png" alt="Discord Bot Authorization Screen" class="screenshot">
+            <div class="note">
+                <strong>Note:</strong> You must have "Manage Server" permissions on the Discord server to add bots.
+            </div>
+            
+            <h3 id="discord-permissions">Bot Permissions Setup</h3>
+            <p>The bot requests the following permissions during installation:</p>
+            <ul>
+                <li><strong>Send Messages:</strong> To post charts and respond to commands</li>
+                <li><strong>Use Slash Commands:</strong> To provide modern Discord slash command interface</li>
+                <li><strong>Attach Files:</strong> To upload chart images</li>
+                <li><strong>Embed Links:</strong> To display rich embeds with information</li>
+                <li><strong>Read Message History:</strong> To process commands properly</li>
+            </ul>
+            
+            <p>If you need to adjust permissions later:</p>
+            <ol>
+                <li>Go to your server settings.</li>
+                <li>Navigate to "Roles" section.</li>
+                <li>Find the "tChartXYZ Bot" role.</li>
+                <li>Adjust permissions as needed.</li>
+            </ol>
+            
+            <h3 id="discord-commands">Using Discord Commands</h3>
+            <p>The Discord bot supports the following slash commands:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                        <th>Usage</th>
+                        <th>Permissions Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/help</code></td>
+                        <td>Display help information and welcome message</td>
+                        <td>Type <code>/help</code> in any channel</td>
+                        <td>Everyone</td>
+                    </tr>
+                    <tr>
+                        <td><code>/chart</code></td>
+                        <td>Generate and post a cryptocurrency chart</td>
+                        <td>Type <code>/chart</code> in any channel</td>
+                        <td>Everyone</td>
+                    </tr>
+                    <tr>
+                        <td><code>/settings</code></td>
+                        <td>Access bot configuration (private message)</td>
+                        <td>Type <code>/settings</code> in any channel</td>
+                        <td>Server Administrator</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <img src="img/dc_30.png" alt="Discord Slash Commands in Action" class="screenshot">
+            
+            <h4>Command Usage Examples</h4>
+            <p>Here's how to use the main commands:</p>
+            
+            <h5>Basic Chart Generation</h5>
+            <ol>
+                <li>Type <code>/chart</code> in any channel where you want the chart to appear.</li>
+                <li>The bot will generate a chart using the current server configuration.</li>
+                <li>The chart will be posted as an image attachment.</li>
+            </ol>
+            
+            <h5>Accessing Settings</h5>
+            <ol>
+                <li>Type <code>/settings</code> in any channel on your server.</li>
+                <li>The bot will send you a private message with configuration options.</li>
+                <li>If you administer multiple servers, you'll see a dropdown to select which server to configure.</li>
+                <li>Use the buttons in the private message to adjust settings.</li>
+            </ol>
+            
+            <img src="img/dc_40.png" alt="Discord Settings Interface" class="screenshot">
+            
+            <h4>Private Message Configuration</h4>
+            <p>Discord bot configuration happens through private messages for security. When you use <code>/settings</code>:</p>
+            <ol>
+                <li>The bot sends you a direct message with server selection (if you have multiple servers).</li>
+                <li>Choose your server from the dropdown menu.</li>
+                <li>Access configuration options including:
+                    <ul>
+                        <li>Auto-posting interval setup</li>
+                        <li>Auto-posting channel selection</li>
+                        <li>Web editor access</li>
+                        <li>Import/Export settings (for superusers)</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <div class="warning">
+                <strong>Important:</strong> Make sure you have direct messages enabled from server members, or the bot won't be able to send you configuration options.
+            </div>
+            
+            <h4>Auto-posting Setup for Discord</h4>
+            <p>To set up automatic chart posting on your Discord server:</p>
+            <ol>
+                <li>Use the <code>/settings</code> command in your server.</li>
+                <li>In the private message, select your server.</li>
+                <li>Click "📢 Auto-posting channel" button to select a specific channel for auto-posting.</li>
+                <li>Choose your preferred channel from the dropdown menu, or select "🚫 Disable auto-posting" to turn off automatic posting.</li>
+                <li>Click "⏱️ Auto-posting interval" button to set the posting frequency.</li>
+                <li>Enter the interval in hours (e.g., 24 for daily posts).</li>
+                <li>Enter 0 to disable auto-posting.</li>
+            </ol>
+            
+            <div class="note">
+                <strong>Tip:</strong> If you don't configure a specific channel, the bot will automatically post to the first available channel where it has permissions. For best results, select a dedicated channel for your charts.
+            </div>
+            
+            <h4>Web Editor Access for Discord</h4>
+            <p>To access the web editor for your Discord server:</p>
+            <ol>
+                <li>Use <code>/settings</code> command in your server.</li>
+                <li>In the private message, select your server from the list.</li>
+                <li>Click "🌐 Web editor" button.</li>
+                <li>Click "🌐 Open web editor" in the response to access the editor.</li>
+                <li>Make your customizations in the web interface.</li>
+                <li>Click "UPDATE TG/DC BOTs" (this updates both Discord and Telegram configurations) to save changes.</li>
+            </ol>
+            
+            <img src="img/dc_50.png" alt="Discord Web Editor Access" class="screenshot">
+            
+            <h2 id="web-constructor">Web Constructor</h2>
+            <p>The web constructor is a powerful visual editor for customizing your charts. This section covers how to use all its features effectively.</p>
+            
+            <h3 id="interface-overview">Interface Overview</h3>
+            <p>The web constructor interface consists of several key parts:</p>
+            <ol>
+                <li><strong>Preview area:</strong> Shows a live preview of your chart</li>
+                <li><strong>Configuration panels:</strong> Expandable sections for customizing different aspects of the chart</li>
+                <li><strong>Chart parameters:</strong> Located at the bottom, for setting token and timeframe information</li>
+                <li><strong>Action buttons:</strong> For importing, exporting, and updating settings</li>
+            </ol>
+            
+            <img src="img/070_overview.png" alt="Screenshot showing overview of web constructor interface" class="screenshot">
+            
+            <h3 id="background-configuration">Background Configuration</h3>
+            <p>To customize the chart background:</p>
+            <ol>
+                <li>Expand the "Background" section by clicking on it.</li>
+                <li>Set the background color using the color picker.</li>
+                <li>Adjust the background opacity using the slider.</li>
+                <li>To add a background image:
+                    <ul>
+                        <li>Click "Drop or click to select background image" and select an image from your computer</li>
+                        <li>Or click "From Gallery" and select from provided library</li>
+                    </ul>
+                </li>
+                <li>Set the overlay color, which provides a tint over the background image.</li>
+            </ol>
+            
+            <img src="img/080_bg.png" alt="Screenshot showing background configuration options" class="screenshot">
+            
+            <h3 id="bar-configuration">Bar Configuration</h3>
+            <p>The chart has four different bar types that you can customize separately:</p>
+            <ul>
+                <li><strong>Up Bar:</strong> Used when the price is moving up</li>
+                <li><strong>Down Bar:</strong> Used when the price is moving down</li>
+                <li><strong>Candle:</strong> Used for positive price movement candles</li>
+                <li><strong>Knife:</strong> Used for negative price movement candles</li>
+            </ul>
+            
+            <p>For each bar type, you can configure:</p>
+            <ol>
+                <li>Bar color</li>
+                <li>High/Low Line width</li>
+                <li>Border settings (width, style, color)</li>
+                <li>Optional image overlay</li>
+            </ol>
+
+            <h4>Border Settings</h4>
+            <p>The border settings provide additional customization for the bar body:</p>
+            <ul>
+                <li><strong>Border Width:</strong> Thickness of the border (0 for no border)</li>
+                <li><strong>Border Color:</strong> Color picker for border color selection</li>
+                <li><strong>Border Style:</strong> 
+                    <ul>
+                        <li><em>Inside:</em> Border appears inside the bar, reducing the body area</li>
+                        <li><em>Outside:</em> Border appears outside the bar, maintaining the body area</li>
+                        <li><em>Center:</em> Border is centered on the edge of the bar</li>
+                    </ul>
+                </li>
+                <li><strong>Apply to all bars:</strong> Option to use the same border settings across all bar types</li>
+            </ul>
+            
+            <h4>Line Width Settings</h4>
+            <p>The line width controls the appearance of the top and bottom components:</p>
+            <ul>
+                <li><strong>Line Width:</strong> Thickness of the high/low lines extending from the body</li>
+                <li><strong>Apply to all bars:</strong> Option to use the same line width across all bar types</li>
+            </ul>
+            
+            <img src="img/090_bars_borders.png" alt="Screenshot showing bar configuration and border settings" class="screenshot">
+            
+            <div class="note">
+                <strong>Tip:</strong> Use the "Apply to all bars" options if you want consistent line width or border settings across all bar types.
+            </div>
+            
+            <h3 id="bar-types-patterns">Bar Types and Image Patterns</h3>
+            <p>tChartXYZ offers extensive customization for how price bars are displayed. Understanding the different bar types and how to apply custom images to them allows for creative and eye-catching charts.</p>
+            
+            <h4>Understanding the Four Bar Types</h4>
+            <p>Each bar type represents a different price movement pattern and consists of several components that can be customized individually:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bar Type</th>
+                        <th>When Used</th>
+                        <th>Components</th>
+                        <th>Visual Pattern</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Up Bar</strong></td>
+                        <td>For price increases (close > open)</td>
+                        <td>
+                            <ul>
+                                <li><strong>Body:</strong> Main rectangular area between open and close prices</li>
+                                <li><strong>Top:</strong> Optional visual element on the top of the bar</li>
+                                <li><strong>Bottom:</strong> Optional visual element on the bottom of the bar</li>
+                            </ul>
+                        </td>
+                        <td>Solid rectangular bar with high/low lines</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Down Bar</strong></td>
+                        <td>For price decreases (close < open)</td>
+                        <td>
+                            <ul>
+                                <li><strong>Body:</strong> Main rectangular area between open and close prices</li>
+                                <li><strong>Top:</strong> Optional visual element on the top of the bar</li>
+                                <li><strong>Bottom:</strong> Optional visual element on the bottom of the bar</li>
+                            </ul>
+                        </td>
+                        <td>Solid rectangular bar with high/low lines</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Candle</strong></td>
+                        <td>Alternative representation for upward movements</td>
+                        <td>
+                            <ul>
+                                <li><strong>Body:</strong> Main rectangular area between open and close prices</li>
+                                <li><strong>Top:</strong> Optional visual element on the top of the bar</li>
+                                <li><strong>Bottom:</strong> Optional visual element on the bottom of the bar</li>
+                                <li><strong>Center:</strong> Optional visual element in the middle of the body</li>
+                            </ul>
+                        </td>
+                        <td>Traditional candlestick pattern for bullish moves</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Knife</strong></td>
+                        <td>Alternative representation for downward movements</td>
+                        <td>
+                            <ul>
+                                <li><strong>Body:</strong> Main rectangular area between open and close prices</li>
+                                <li><strong>Top:</strong> Optional visual element on the top of the bar</li>
+                                <li><strong>Bottom:</strong> Optional visual element on the bottom of the bar</li>
+                                <li><strong>Center:</strong> Optional visual element in the middle of the body</li>
+                            </ul>
+                        </td>
+                        <td>Traditional candlestick pattern for bearish moves</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+                <img src="img/100_bar_types.png" alt="Visual examples of the four bar types with labeled components" class="screenshot">
+    
+            <h4>Component-Specific Customization</h4>
+            <p>You can apply different styles and images to each component of a bar:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Available Customizations</th>
+                        <th>Typical Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Body <I></I>mage</strong></td>
+                        <td>
+                            <ul>
+                                <li>Image Scale </li> 
+                                <li>Color Balance: color correction</li>
+                                <li>Start From: top (cut on bottom), bottom (cut on top), fill (additional scale to fit)</li>
+                                <li>Overlap: percentage of overlapping tiles </li>
+                                <li>X Offset </li>
+                                <li>Rotation: in degrees</li>
+                            </ul>
+                        </td>
+                        <td>Main visual element of the bar, often customized with project logos or thematic images</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Top Image</strong></td>
+                        <td>
+                            <ul>
+                                <li>Scale </li> 
+                                <li>Color Balance: color correction</li>
+                                <li>X Offset </li>
+                                <li>Y Offset </li>
+                                <li>Rotation: in degrees</li>
+                            </ul>
+                        </td>
+                        <td>Represents the top price in the period</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bottom Image</strong></td>
+                        <td>
+                            <ul>
+                                <li>Scale </li> 
+                                <li>Color Balance: color correction</li>
+                                <li>X Offset </li>
+                                <li>Y Offset </li>
+                                <li>Rotation: in degrees</li>
+                            </ul>
+                        </td>
+                        <td>Represents the Lowe price in the period</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Center Image (for Knife or Candle)</strong></td>
+                        <td>
+                            <ul>
+                                <li>Scale </li> 
+                                <li>Color Balance: color correction</li>
+                                <li>X Offset </li>
+                                <li>Y Offset </li>
+                                <li>Rotation: in degrees</li>
+                            </ul>
+                        </td>
+                        <td>Image in the center of the Knife or Candle bar.</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h4>Adding Custom Images to Bars</h4>
+            <p>Each bar type and component can be enhanced with custom images:</p>
+            <ol>
+                <li>Expand the appropriate bar type section (Up Bar, Down Bar, Candle, or Knife).</li>
+                <li>For body customization, use the main image upload section.</li>
+                <li>For center customization (Candle and Knife only), find the specific center image section.</li>
+                <li>Choose from these options:
+                    <ul>
+                        <li>Upload a custom image from your device</li>
+                        <li>Select from the built-in gallery</li>
+                    </ul>
+                </li>
+                <li>After adding an image, you can adjust:
+                    <ul>
+                        <li><strong>Scale:</strong> Make the image larger or smaller</li>
+                        <li><strong>Position:</strong> Adjust X and Y offsets to position the image perfectly</li>
+                        <li><strong>Overlapping:</strong> Percentage</li>
+                        <li><strong>Color Balance:</strong> Color Correction</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <img src="/img/110_images.png" alt="Screenshot of image upload interface for bar components" class="screenshot">
+            
+            
+            
+            <h4>Creative Applications</h4>
+            <p>Here are some ways to use custom images effectively with different components:</p>
+            <ul>
+                <li><strong>Brand your chart:</strong> 
+                    <ul>
+                        <li>Use your project's logo in the body of up bars</li>
+                        <li>Use a simplified or monochrome version in down bars</li>
+                        <li>Add special center images for milestone events</li>
+                    </ul>
+                </li>
+                <li><strong>Thematic designs:</strong> 
+                    <ul>
+                        <li>Holiday themes with seasonal images in the body</li>
+                        <li>Consistent top/bottom line colors to match theme</li>
+                    </ul>
+                </li>
+                <li><strong>Visual storytelling:</strong> 
+                    <ul>
+                        <li>Use progression of images across different bar types</li>
+                        <li>Highlight important price points with distinctive center images</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <div class="warning">
+                <strong>Important:</strong> When using custom images, ensure they have transparent backgrounds for best results. PNG format is recommended. For consistent appearance, maintain similar dimensions for images used across different bar types.
+            </div>
+            
+            <h4>Example Setups</h4>
+            <p>Here are some popular image configurations:</p>
+            <ul>
+                <li><strong>Logo-based:</strong> 
+                    <ul>
+                        <li>Body: Project logo for up bars, simplified version for down bars</li>
+                        <li>Top/Bottom: Thin lines matching logo colors</li>
+                        <li>Center (Candle/Knife): Project symbol or icon</li>
+                    </ul>
+                </li>
+                <li><strong>Theme-based:</strong> 
+                    <ul>
+                        <li>Body: Rockets for up bars, falling objects for down bars</li>
+                        <li>Top/Bottom: Flame effects or motion lines</li>
+                        <li>Border: Contrasting color to enhance visibility</li>
+                    </ul>
+                </li>
+                <li><strong>Pattern-based:</strong> 
+                    <ul>
+                        <li>Body: Gradient or pattern images rather than solid colors</li>
+                        <li>Top/Bottom: Matching solid colors</li>
+                        <li>Center: Accent patterns complementing the body design</li>
+                    </ul>
+                </li>
+            </ul>
+            
+            <div class="note">
+                <strong>Tip:</strong> For the most professional-looking charts, maintain consistency in your image style across all bar types and components. Use the "Apply to all bars" options to quickly set uniform line widths and border styles.
+            </div>
+            
+            <h3 id="text-settings">Text Settings</h3>
+            <p>To customize the text appearance on your chart:</p>
+            <ol>
+                <li>Expand the "Text" section.</li>
+                <li>Choose the text color using the color picker.</li>
+                <li>Select a font from the dropdown menu.</li>
+                <li>Adjust the font size using the slider.</li>
+                <li>Toggle display options to show or hide specific information:
+                    <ul>
+                        <li>Market Cap</li>
+                        <li>Price</li>
+                        <li>Timeline</li>
+                        <li>Price Change</li>
+                        <li>Token Name</li>
+                        <li>Min/Max Price</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <img src="img/120_text.png" alt="Screenshot showing text settings configuration" class="screenshot">
+            
+            <h3 id="chart-parameters">Chart Parameters</h3>
+            <p>To set up the token and timeframe for your chart:</p>
+            <ol>
+                <li>Scroll to the bottom of the page to the "Chart Generator" section.</li>
+                <li>Select the blockchain network from the dropdown (e.g., Ethereum, BSC, Polygon).</li>
+                <li>Enter the pool address for the token you want to track.</li>
+                <li>Set the chart duration (in hours) for autopost interval (you can change it in TG bot).</li>
+                <li>Choose the number of bars to display.</li>
+                <li>Select the time interval (minute, hour, day).</li>
+                <li>Click "Generate Preview" to test your settings.</li>
+            </ol>
+            
+            <img src="img/130_params.png" alt="Screenshot showing chart parameters configuration" class="screenshot">
+            
+            <div class="note">
+                <strong>Tip:</strong> You can find pool addresses on DEX explorers like GeckoTerminal, Dextools, or Dexscreener.
+            </div>
+            
+            <h2 id="advanced">Advanced Features</h2>
+            
+            <h3 id="export-import">Export and Import Configuration</h3>
+            <p>You can save and share your chart configurations:</p>
+            <ol>
+                <li>To export your current configuration:
+                    <ul>
+                        <li>Click the "Export" button in the Chart Generator section</li>
+                        <li>A JSON file with your settings will be downloaded</li>
+                    </ul>
+                </li>
+                <li>To import a configuration:
+                    <ul>
+                        <li>Click the "Import" button</li>
+                        <li>Select a previously exported JSON file</li>
+                        <li>The settings will be applied immediately</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <h3 id="updating-tg-settings">Updating Bot Settings</h3>
+            <p>When editing through the web interface, your changes don't automatically sync with the bots. To update the bot configuration:</p>
+            <ol>
+                <li>After making changes in the web editor, look for the "UPDATE TG/DC BOTs" button at the top of the page.</li>
+                <li>Click this button to send your current configuration to both Telegram and Discord bots.</li>
+                <li>You'll see a notification confirming successful update.</li>
+            </ol>
+            
+            <div class="warning">
+                <strong>Important:</strong> If you don't click "UPDATE TG/DC BOTs", your changes will only affect the current web session and won't be saved to the bots.
+            </div>
+            
+            <img src="img/140_toTG.png" alt="Screenshot showing UPDATE TG/DC BOTs button location" class="screenshot">
+            
+            <h3 id="json-structure">Understanding the JSON Structure</h3>
+            <p>For advanced users who want to manually edit configuration files, here's the basic structure of the configuration JSON:</p>
+            <pre>{
+  "background": {
+    "color": "#000000",
+    "opacity": 0.5,
+    "image": {
+      "url": "",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    }
+  },
+  "overlay": {
+    "color": "#000000"
+  },
+  "font": {
+    "family": "Arial",
+    "size": 40,
+    "color": "#ffffff"
+  },
+  "display": {
+    "showMarketCap": true,
+    "showPrice": true,
+    "showTimeline": true,
+    "showPriceChange": true,
+    "showTokenName": true,
+    "showMinMax": true
+  },
+  "upBar": {
+    "color": "#26a69a",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  // Other bar types (downBar, candle, knife) follow same structure
+  "network": "polygon_pos",
+  "poolAddress": "0xa030be97a53d6462c675962fec3eafbe53b8bb6c",
+  "duration": 4,
+  "numBars": 20,
+  "interval": "hour"
+}</pre>
+            
+            <h2 id="troubleshooting">Troubleshooting</h2>
+            <p>Common issues and their solutions:</p>
+            
+            <h3>Telegram Bot Issues</h3>
+            
+            <h3>Bot Not Responding</h3>
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>Bot doesn't have required permissions</li>
+                <li>Bot was removed from the group</li>
+                <li>Server issues</li>
+            </ul>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Check bot's admin permissions</li>
+                <li>Try removing and adding the bot again</li>
+                <li>Check if the bot responds in private messages</li>
+            </ul>
+            
+            <h3>Chart Shows "Failed to get chart data"</h3>
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>Invalid pool address</li>
+                <li>Selected network doesn't match the pool address</li>
+                <li>API rate limiting or temporary unavailability</li>
+            </ul>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Double-check your pool address</li>
+                <li>Verify you're using the correct network</li>
+                <li>Wait a few minutes and try again</li>
+            </ul>
+            
+            <h3>Auto-posting Not Working</h3>
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>Bot lacks necessary permissions</li>
+                <li>Bot was restarted</li>
+                <li>Interval set to zero</li>
+            </ul>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Check bot's permissions</li>
+                <li>Verify auto-post interval is properly set</li>
+                <li>Trigger a manual post with /chart to reset the timer</li>
+            </ul>
+            
+            <h3>Discord Bot Issues</h3>
+            
+            <h3>Discord Bot Not Responding to Slash Commands</h3>
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>Bot doesn't have necessary permissions in the channel</li>
+                <li>Slash commands not synced properly</li>
+                <li>Bot was recently added and commands haven't appeared yet</li>
+            </ul>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Check bot's permissions in Server Settings > Roles</li>
+                <li>Wait a few minutes for Discord to sync commands globally</li>
+                <li>Try using commands in a different channel</li>
+                <li>Remove and re-add the bot if problems persist</li>
+            </ul>
+            
+            <h3>Can't Access Discord Settings (No Private Message)</h3>
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>Direct messages disabled from server members</li>
+                <li>Bot blocked in private messages</li>
+                <li>User not an administrator of any servers with the bot</li>
+            </ul>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Enable "Allow direct messages from server members" in Privacy Settings</li>
+                <li>Check if you have administrator permissions on the server</li>
+                <li>Unblock the bot if previously blocked</li>
+            </ul>
+            
+            <h3>Discord Auto-posting Not Working</h3>
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>No channel selected for auto-posting</li>
+                <li>Bot lost permissions in the target channel</li>
+                <li>Auto-posting interval not configured</li>
+                <li>Bot was removed and re-added (resets auto-posting)</li>
+            </ul>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Use <code>/settings</code> to configure a specific auto-posting channel</li>
+                <li>Check bot permissions in the target channel</li>
+                <li>Reconfigure auto-posting interval through <code>/settings</code></li>
+                <li>Verify the auto-posting interval is set to a value greater than 0</li>
+            </ul>
+            
+            <h3>Discord Charts Not Generating</h3>
+            <p><strong>Possible causes:</strong></p>
+            <ul>
+                <li>Server configuration not properly set up</li>
+                <li>Invalid pool address or network mismatch</li>
+                <li>Bot lacks "Attach Files" permission</li>
+            </ul>
+            <p><strong>Solutions:</strong></p>
+            <ul>
+                <li>Use <code>/settings</code> to access web editor and verify configuration</li>
+                <li>Check pool address and network settings in web editor</li>
+                <li>Verify bot has "Attach Files" permission in channel/server settings</li>
+            </ul>
+            
+            <h2 id="faq">Frequently Asked Questions</h2>
+            
+            <h3>Can I use the bot in multiple groups?</h3>
+            <p>Yes, the bot can be added to multiple groups, and each group will have its own separate configuration.</p>
+            
+            <h3>Can I use the bot on both Discord and Telegram?</h3>
+            <p>Yes! The tChartXYZ Bot is available on both platforms. Each Discord server and Telegram group maintains separate configurations, so you can customize them independently.</p>
+            
+            <h3>How do Discord slash commands work?</h3>
+            <p>Discord slash commands start with <code>/</code> and provide auto-completion. Simply type <code>/</code> followed by the command name (like <code>/chart</code> or <code>/settings</code>) and Discord will show available options.</p>
+            
+            <h3>Why do Discord settings open in a private message?</h3>
+            <p>Discord bot configurations are sent via private message for security reasons. This prevents server members from seeing administrator configuration options and keeps sensitive settings private.</p>
+            
+            <h3>Can I use the Discord bot without administrator permissions?</h3>
+            <p>You can use basic commands like <code>/chart</code> without administrator permissions, but you need administrator rights to access <code>/settings</code> and configure the bot for your server.</p>
+            
+            <h3>Is there a limit to how many charts I can generate?</h3>
+            <p>There's no strict limit, but there is a cooldown period between manual chart generations to prevent spam.</p>
+            
+            <h3>Can I track any token?</h3>
+            <p>You can track any token that has a liquidity pool on a supported DEX. The bot supports various networks including Ethereum, BSC, Polygon, Arbitrum, and others.</p>
+            
+            <h3>My chart is missing some data, why?</h3>
+            <p>If the token has low trading volume or is very new, there might not be enough data points to generate a complete chart. Try reducing the duration or number of bars.</p>
+            
+            <h3>Can I customize the watermark?</h3>
+            <p>The watermark is a required element. But can be removed fot month  payment $2 in Polygon $POL or $1 in $TRYAN.</p>
+            
+            <h3>How do I get support if I have issues?</h3>
+            <p>You can reach out through the <a href="https://t.me/tChartXYZ_bot" target="_blank">Telegram bot</a> or check the official <a href="https://x.com/tChartxyz" target="_blank">X.com account</a> for announcements and support information.</p>
+            
+            <h3>Where can I find the Terms and Privacy Policy?</h3>
+            <p>You can find our <a href="terms.html">Terms and Conditions</a> and <a href="privacy.html">Privacy Policy</a> on their respective pages. These documents outline your rights and our responsibilities regarding the use of tChartXYZ Bot.</p>
+            
+            <a href="#" class="top-link" title="Back to Top">↑</a>
+        </div>
+        
+        <div class="footer-links" style="margin-top: 50px; padding-top: 30px; border-top: 1px solid #3D3D3D; text-align: center;">
+            <a href="terms.html" style="display: inline-block; margin: 0 15px; padding: 10px 20px; background-color: #2D2D2D; color: #E0E0E0; text-decoration: none; border-radius: 5px; transition: all 0.3s ease;">Terms and Conditions</a>
+            <a href="privacy.html" style="display: inline-block; margin: 0 15px; padding: 10px 20px; background-color: #2D2D2D; color: #E0E0E0; text-decoration: none; border-radius: 5px; transition: all 0.3s ease;">Privacy Policy</a>
+        </div>
+    </div>
+</body>
+</html> 

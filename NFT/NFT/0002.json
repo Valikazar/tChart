@@ -1,0 +1,45 @@
+{
+    "name": "tChartXYZ #2: Preset. POLMOON Preset",
+    "description": "# tChartXYZ Chart #2: POLMOON Preset\nPresets shine, but will they soar? This Rare chart captures POLMOON's unique preset with a stunning design.\n\n- Track epic trends\n- Stunning visuals for traders\n- Collect for crypto insights \n\n> POLMOON's style, immortalized in pixels!\n\nMint on Polygon at tChartXYZ. #tChartXYZ #BoxRat",
+    "image": "ipfs://",
+    "external_url": "https://tchart.xyz/nft",
+    "attributes": [
+      {
+        "trait_type": "Network",
+        "value": "Polygon",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Token",
+        "value": "POLMOON",
+        "rarity": "Rare"
+      },
+      {
+        "trait_type": "Duration",
+        "value": "Bar 1 Day",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Background",
+        "value": "Polmoon",
+        "rarity": "Rare"
+      },
+      {
+        "trait_type": "Type",
+        "value": "Preset",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Chart Pattern",
+        "value": "Preset",
+        "rarity": "Epic"
+      },
+      {
+        "trait_type": "Indicator",
+        "value": "None",
+        "rarity": "Common"
+      }
+    ]
+  }
+  
+  

@@ -1,0 +1,43 @@
+{
+    "name": "tChartXYZ #7: Chart. POL Endless Fall (September 26, 2025)",
+    "description": "# tChartXYZ Chart #7: POL Endless Fall\nPOL's endless, tiring plunge – the depressive token that keeps falling! This common chart captures the infinite drop on daily candles in Polygon.\n\n- Track epic downtrends\n- Stunning visuals for traders\n- Collect for crypto insights \n\n> POL's bottomless pit, immortalized in pixels!\n\nMint on Polygon at tChartXYZ. #tChartXYZ #BoxRat",
+    "image": "ipfs://",
+    "external_url": "https://tchart.xyz/nft",
+    "attributes": [
+      {
+        "trait_type": "Network",
+        "value": "Polygon",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Token",
+        "value": "POL",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Type",
+        "value": "Endless Fall",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Duration",
+        "value": "Bar 1 Day",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Background",
+        "value": "Polygon",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Chart Pattern",
+        "value": "Downtrend",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Indicator",
+        "value": "None",
+        "rarity": "Common"
+      }
+    ]
+  }

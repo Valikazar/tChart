@@ -1,0 +1,48 @@
+{
+  "background": {
+    "color": "#000000",
+    "opacity": 0.5,
+    "image": {
+      "url": "",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    }
+  },
+  "overlay": {
+    "color": "#000000"
+  },
+  "font": {
+    "family": "CRYSTAL",
+    "size": 40,
+    "color": "#ffffff"
+  },
+  "display": {
+    "showMarketCap": true,
+    "showPrice": true,
+    "showTimeline": true,
+    "showPriceChange": true,
+    "showTokenName": true,
+    "showMinMax": true
+  },
+  "upBar": {
+    "color": "#26a69a"
+  },
+  "downBar": {
+    "color": "#ef5350"
+  },
+  "candle": {
+    "color": "#00ff00"
+  },
+  "knife": {
+    "color": "#FF0700"
+  },
+  "network": "polygon_pos",
+  "poolAddress": "0xa030be97a53d6462c675962fec3eafbe53b8bb6c",
+  "duration": 4,
+  "numBars": 20,
+  "interval": "hour",
+  "minimal_duration": 0.002,
+  "last_poster_time": 1750763787.8530138,
+  "free": false
+}

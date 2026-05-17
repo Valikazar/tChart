@@ -1,0 +1,43 @@
+{
+    "name": "tChartXYZ #6: Chart. BNB All-Time High Moonshot (September 18, 2025)",
+    "description": "# tChartXYZ Chart #6: BNB ATH\nBNB blasts past $1,000 ATH today! This Rare chart captures the explosive pump on daily candles in BSC.\n\n- Track epic ATH pumps\n- Stunning visuals for traders\n- Collect for crypto insights \n\n> BNB's moon shot, immortalized in pixels!\n\nMint on Polygon at tChartXYZ. #tChartXYZ #BoxRat",
+    "image": "ipfs://",
+    "external_url": "https://tchart.xyz/nft",
+    "attributes": [
+      {
+        "trait_type": "Network",
+        "value": "BSC",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Token",
+        "value": "BNB",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Duration",
+        "value": "Bar 1 Day",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Background",
+        "value": "BNB",
+        "rarity": "Rare"
+      },
+      {
+        "trait_type": "Type",
+        "value": "Chart",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Chart Pattern",
+        "value": "ATH",
+        "rarity": "Epic"
+      },
+      {
+        "trait_type": "Indicator",
+        "value": "None",
+        "rarity": "Common"
+      }
+    ]
+}  

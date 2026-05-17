@@ -1,0 +1,45 @@
+{
+    "name": "tChartXYZ #1: Chart. POLMOON Rugpull",
+    "description": "# tChartXYZ Chart #1: POLMOON Rugpull\nRugpulls crash, but will they rebound? This Rare chart captures POLMOON's devastating rugpull with a unique design.\n\n- Track epic dumps\n- Stunning visuals for traders\n- Collect for crypto insights \n\n> POLMOON's plummet, immortalized in pixels!\n\nMint on Polygon at tChartXYZ. #tChartXYZ #BoxRat",
+    "image": "ipfs://",
+    "external_url": "https://tchart.xyz/nft",
+    "attributes": [
+      {
+        "trait_type": "Network",
+        "value": "Polygon",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Token",
+        "value": "POLMOON",
+        "rarity": "Rare"
+      },
+      {
+        "trait_type": "Duration",
+        "value": "Bar 1 Day",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Background",
+        "value": "Polmoon",
+        "rarity": "Rare"
+      },
+      {
+        "trait_type": "Type",
+        "value": "Chart",
+        "rarity": "Common"
+      },
+      {
+        "trait_type": "Chart Pattern",
+        "value": "Rugpull",
+        "rarity": "Epic"
+      },
+      {
+        "trait_type": "Indicator",
+        "value": "None",
+        "rarity": "Common"
+      }
+    ]
+  }
+  
+  

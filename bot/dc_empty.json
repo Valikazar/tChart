@@ -1,0 +1,88 @@
+{
+  "background": {
+    "color": "#000000",
+    "opacity": 0.5,
+    "image": {
+      "url": "",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    }
+  },
+  "overlay": {
+    "color": "#000000"
+  },
+  "upBar": {
+    "color": "#26a69a"
+  },
+  "downBar": {
+    "color": "#ef5350"
+  },
+  "candle": {
+    "color": "#00ff00"
+  },
+  "knife": {
+    "color": "#FF0700"
+  },
+  "doji": {
+    "color": "#FFFF00",
+    "active": false
+  },
+  "highLowLines": {
+    "lineWidth": 1,
+    "upBar": {
+      "lineColor": "#26a69a"
+    },
+    "downBar": {
+      "lineColor": "#ef5350"
+    },
+    "candle": {
+      "lineColor": "#00ff00"
+    },
+    "knife": {
+      "lineColor": "#FF0700"
+    },
+    "doji": {
+      "lineColor": "#FFFF00"
+    }
+  },
+  "borders": {
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "upBar": {
+      "borderColor": "#FFFFFF"
+    },
+    "downBar": {
+      "borderColor": "#FFFFFF"
+    },
+    "candle": {
+      "borderColor": "#FFFFFF"
+    },
+    "knife": {
+      "borderColor": "#FFFFFF"
+    },
+    "doji": {
+    "borderColor": "#FFFFFF"
+    }
+  },
+  "font": {
+    "family": "Arial",
+    "size": 40,
+    "color": "#ffffff"
+  },
+  "display": {
+    "showMarketCap": true,
+    "showPrice": true,
+    "showTimeline": true,
+    "showPriceChange": true,
+    "showTokenName": true,
+    "showMinMax": true
+  },
+  "network": "polygon_pos",
+  "poolAddress": "0xA030BE97a53d6462C675962feC3EaFbE53b8bb6C",
+  "duration": 4,
+  "numBars": 20,
+  "interval": "hour",
+  "minimal_duration": 0.02,
+  "free": false
+} 

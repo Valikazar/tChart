@@ -1,0 +1,43 @@
+{
+  "name": "tChartXYZ #4: Chart. BTC All-Time High Moonshot (August 6, 2025)",
+  "description": "Dive into the crypto cosmos with this NFT depicting Bitcoin's legendary all-time high chart pattern from August 6, 2025, against a mesmerizing Bitcoin Moon background. Part of the tChartXYZ series, where token price dynamics become timeless digital art pieces featuring epic patterns and blockchain flair.",
+  "image": "ipfs://",
+  "external_url": "https://tchart.xyz/nft",
+  "attributes": [
+    {
+      "trait_type": "Network",
+      "value": "Bitcoin",
+      "rarity": "Rare"
+    },
+    {
+      "trait_type": "Token",
+      "value": "BTC",
+      "rarity": "Rare"
+    },
+    {
+      "trait_type": "Duration",
+      "value": "Bar 1 Day",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Background",
+      "value": "Bitcoin Moon",
+      "rarity": "Rare"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Chart",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Chart Pattern",
+      "value": "ATH",
+      "rarity": "Epic"
+    },
+    {
+      "trait_type": "Indicator",
+      "value": "None",
+      "rarity": "Common"
+    }
+  ]
+}

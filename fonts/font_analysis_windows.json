@@ -1,0 +1,123 @@
+{
+  "workingFonts": [
+    {
+      "file": "AnarchySans.otf",
+      "baseName": "AnarchySans",
+      "workingName": "AnarchySans",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    },
+    {
+      "file": "AnitaSemi-square.otf",
+      "baseName": "AnitaSemi-square",
+      "workingName": "AnitaSemi-square",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    },
+    {
+      "file": "Blogger Sans.otf",
+      "baseName": "Blogger Sans",
+      "workingName": "Blogger Sans",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    },
+    {
+      "file": "Computer-Speak.otf",
+      "baseName": "Computer-Speak",
+      "workingName": "Computer-Speak",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    },
+    {
+      "file": "CRYSTAL-Regular.ttf",
+      "baseName": "CRYSTAL-Regular",
+      "workingName": "CRYSTAL-Regular",
+      "testResult": {
+        "success": true,
+        "width": 48.369140625
+      }
+    },
+    {
+      "file": "GaroaHackerClubeBold.otf",
+      "baseName": "GaroaHackerClubeBold",
+      "workingName": "GaroaHackerClubeBold",
+      "testResult": {
+        "success": true,
+        "width": 42.724609375
+      }
+    },
+    {
+      "file": "GetVoIP Grotesque.ttf",
+      "baseName": "GetVoIP Grotesque",
+      "workingName": "GetVoIP Grotesque",
+      "testResult": {
+        "success": true,
+        "width": 42.724609375
+      }
+    },
+    {
+      "file": "idealist-sans.light.ttf",
+      "baseName": "idealist-sans.light",
+      "workingName": "idealist-sans.light",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    },
+    {
+      "file": "Keenton.ttf",
+      "baseName": "Keenton",
+      "workingName": "Keenton",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    },
+    {
+      "file": "Komi.ttf",
+      "baseName": "Komi",
+      "workingName": "Komi",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    },
+    {
+      "file": "RichEatin.ttf",
+      "baseName": "RichEatin",
+      "workingName": "RichEatin",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    },
+    {
+      "file": "RichEatin.ttf",
+      "baseName": "RichEatin",
+      "workingName": "RichEatin",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    },
+    {
+      "file": "ROBOTECH GP.ttf",
+      "baseName": "ROBOTECH GP",
+      "workingName": "ROBOTECH GP",
+      "testResult": {
+        "success": true,
+        "width": 35.78125
+      }
+    }
+  ],
+  "totalFonts": 13,
+  "workingCount": 13
+}

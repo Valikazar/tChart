@@ -1,0 +1,43 @@
+{
+  "name": "tChartXYZ #10: Chart. Polygon - Halloween Killer (November 01, 2025)",
+  "description": "# tChartXYZ Chart #10: Polygon - Halloween Killer\nPolygon – the relentless killer that won't stop slaying your portfolio! This Rare chart captures the 1-day bar horror show, perfect for Halloween haunts. \n\n> Polygon: the zombie token that keeps coming back to bite!\n\nMint on Polygon at tChartXYZ. #tChartXYZ #BoxRat",
+  "image": "ipfs://",
+  "external_url": "https://tchart.xyz/nft",
+  "attributes": [
+    {
+      "trait_type": "Network",
+      "value": "Polygon",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Token",
+      "value": "POL",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Duration",
+      "value": "Bar 1 Day",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Background",
+      "value": "Dark Purple Pumpkin",
+      "rarity": "Rare"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Chart",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Chart Pattern",
+      "value": "Common",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Indicator",
+      "value": "Speech Bubble",
+      "rarity": "Rare"
+    }
+  ]
+}

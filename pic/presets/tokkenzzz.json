@@ -1,0 +1,101 @@
+{
+  "background": {
+    "color": "#000000",
+    "opacity": 0.5,
+    "image": {
+      "url": "",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    }
+  },
+  "overlay": {
+    "color": "#000000"
+  },
+  "font": {
+    "family": "Arial",
+    "size": 40,
+    "color": "#ffffff"
+  },
+  "display": {
+    "showMarketCap": false,
+    "showPrice": true,
+    "showTimeline": true,
+    "showPriceChange": true,
+    "showTokenName": true,
+    "showMinMax": false
+  },
+  "upBar": {
+    "color": "#26a69a"
+  },
+  "downBar": {
+    "color": "#ef5350"
+  },
+  "candle": {
+    "color": "#00ff00"
+  },
+  "knife": {
+    "color": "#FF0700"
+  },
+  "doji": {
+    "color": "#FFFF00",
+    "active": true
+  },
+  "highLowLines": {
+    "lineWidth": 1,
+    "upBar": {
+      "lineColor": "#26a69a"
+    },
+    "downBar": {
+      "lineColor": "#ef5350"
+    },
+    "candle": {
+      "lineColor": "#00ff00"
+    },
+    "knife": {
+      "lineColor": "#FF0700"
+    },
+    "doji": {
+      "lineColor": "#FFFF00"
+    }
+  },
+  "borders": {
+    "borderWidth": 4,
+    "topBevel": 71,
+    "bottomBevel": 41,
+    "topRound": true,
+    "bottomRound": true,
+    "borderSides": {
+      "top": true,
+      "bottom": true,
+      "left": true,
+      "right": true
+    },
+    "upBar": {
+      "borderColor": "#FFFFFF"
+    },
+    "downBar": {
+      "borderColor": "#FFFFFF"
+    },
+    "candle": {
+      "borderColor": "#FFFFFF"
+    },
+    "knife": {
+      "borderColor": "#FFFFFF"
+    },
+    "doji": {
+      "borderColor": "#FFFFFF"
+    }
+  },
+  "fineTuning": {
+    "maxCandles": 10,
+    "maxKnives": 10
+  },
+  "network": "polygon_pos",
+  "poolAddress": "0xa030be97a53d6462c675962fec3eafbe53b8bb6c",
+  "duration": 4,
+  "numBars": 12,
+  "interval": "hour",
+  "free": false,
+  "displayName": "Tokkkenzzz"
+}

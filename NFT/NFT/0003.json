@@ -1,0 +1,43 @@
+{
+  "name": "tChartXYZ #3: Chart. TRYAN Rocket Candle",
+  "description": "# tChartXYZ Chart #3: TRYAN Rocket Candle\nRockets soar, but will they land? This **Rare** chart captures TRYAN's explosive rocket candle with a unique design.\n\n- Track *epic pumps*\n- Stunning visuals for traders\n- Collect for **crypto insights** 📈\n\n> TRYAN's moon shot, immortalized in pixels!\n\nMint on Polygon at [tChartXYZ](https://tchart.xyz/nft). #tChartXYZ #BoxRat",
+  "image": "ipfs://",
+  "external_url": "https://tchart.xyz/nft",
+  "attributes": [
+    {
+      "trait_type": "Network",
+      "value": "Polygon",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Token",
+      "value": "TRYAN",
+      "rarity": "Rare"
+    },
+    {
+      "trait_type": "Duration",
+      "value": "Bar 1 Day",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Background",
+      "value": "Tryan",
+      "rarity": "Rare"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Chart",
+      "rarity": "Common"
+    },
+    {
+      "trait_type": "Chart Pattern",
+      "value": "Rocket Candle",
+      "rarity": "Epic"
+    },
+    {
+      "trait_type": "Indicator",
+      "value": "None",
+      "rarity": "Common"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+Searching for: 0x455e53cbb86018ac2b8092fdcd39d8444affc3f6
+FOUND POOL ID: eth_0x88ada7b1dd1c728ea87404cea7a0780139eb35d1
+FOUND POOL NAME: POL / WETH 0.3%
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0x88ada7b1dd1c728ea87404cea7a0780139eb35d1
+   Pool MC: 1136503199.15367 | FDV: 1136503193.32924
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------
+FOUND POOL ID: eth_0x57ac7c372e5fd187c704d16a9be67af4c2773faa45fb23af1daf9d0738843202
+FOUND POOL NAME: POL / ETH 1%
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0x57ac7c372e5fd187c704d16a9be67af4c2773faa45fb23af1daf9d0738843202
+   Pool MC: 1157387579.77141 | FDV: 1157387573.83995
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------
+FOUND POOL ID: eth_0x3944765dcd3542bc3624b1ccc5b4b5110d48edbb
+FOUND POOL NAME: POL / MATIC 0.3%
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0x3944765dcd3542bc3624b1ccc5b4b5110d48edbb
+   Pool MC: 1135159832.66792 | FDV: 1135159826.85037
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------
+FOUND POOL ID: eth_0xb722fd570d68d0c2de769a5d7c2fd11e7f1b0ef2
+FOUND POOL NAME: POL / WETH 1%
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0xb722fd570d68d0c2de769a5d7c2fd11e7f1b0ef2
+   Pool MC: 1134155380.48187 | FDV: 1134155374.66946
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------
+FOUND POOL ID: eth_0x6d74cdb6cf250dc3dc66015b2ff300b6e586c826
+FOUND POOL NAME: POL / ARKM 1%
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0x6d74cdb6cf250dc3dc66015b2ff300b6e586c826
+   Pool MC: 1124960585.09073 | FDV: 1124960579.32545
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------
+FOUND POOL ID: eth_0x8bc20896ba989c80747a0520696ae504e01f7cb4
+FOUND POOL NAME: POL / USDC 0.05%
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0x8bc20896ba989c80747a0520696ae504e01f7cb4
+   Pool MC: 1098455629.73232 | FDV: 1098455624.10287
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------
+FOUND POOL ID: eth_0x2d9522ac271e50d508f178a9de2b3ed5a7a1f15e654baf85540eddd2280f15c0
+FOUND POOL NAME: POL / KEN 0.01%
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0x2d9522ac271e50d508f178a9de2b3ed5a7a1f15e654baf85540eddd2280f15c0
+   Pool MC: 1236939744.19659 | FDV: 1236939744.10098
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------
+FOUND POOL ID: eth_0x23e01d1d6d0a413df6fb7dfbbd94b0a8c75dc4f1
+FOUND POOL NAME: POL / WETH
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0x23e01d1d6d0a413df6fb7dfbbd94b0a8c75dc4f1
+   Pool MC: 1181949496.9422 | FDV: 1181949490.88486
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------
+FOUND POOL ID: eth_0x9041681bbebcb29473027cba67b842db46a0bc5e48ecf7f94d6811129079beeb
+FOUND POOL NAME: POL / USDC 0.3%
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0x9041681bbebcb29473027cba67b842db46a0bc5e48ecf7f94d6811129079beeb
+   Pool MC: 1883555264.14118 | FDV: 1883555254.4882
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------
+FOUND POOL ID: eth_0x6aa4990d19869acda63da51e55b14b028bfc11035ff60ba40fc984fa9864f758
+FOUND POOL NAME: POL / DAI 42%
+Fetching Pool: https://api.geckoterminal.com/api/v2/networks/eth/pools/0x6aa4990d19869acda63da51e55b14b028bfc11035ff60ba40fc984fa9864f758
+   Pool MC: 1215798650.65985 | FDV: 1215798644.42903
+   Token MC: 1143427523.94867 | FDV: 1136503193.13788
+--------------------

@@ -1,5 +1,0 @@
-[33mcommit 8e2d42c6f53080ecad701922ee1f9b9005238dcf[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
-Author: Chart Constructor <chartconstructor@example.com>
-Date:   Sat Mar 29 14:38:22 2025 +0300
-
-    Добавлена универсальная функция отрисовки графиков с использованием skia-canvas для Node.js и браузера

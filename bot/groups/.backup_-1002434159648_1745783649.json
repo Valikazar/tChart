@@ -1,0 +1,62 @@
+{
+  "background": {
+    "color": "#000000",
+    "opacity": 0.5,
+    "image": {
+      "url": "",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    }
+  },
+  "overlay": {
+    "color": "#000000"
+  },
+  "upBar": {
+    "color": "#26a69a",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "downBar": {
+    "color": "#ef5350",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "candle": {
+    "color": "#00ff00",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "knife": {
+    "color": "#FF0700",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "font": {
+    "family": "Arial",
+    "size": 40,
+    "color": "#ffffff"
+  },
+  "display": {
+    "showMarketCap": true,
+    "showPrice": true,
+    "showTimeline": true,
+    "showPriceChange": true,
+    "showTokenName": true,
+    "showMinMax": true
+  },
+  "network": "polygon",
+  "poolAddress": "",
+  "duration": 4,
+  "numBars": 20,
+  "interval": "hour",
+  "last_poster_time": 0
+}

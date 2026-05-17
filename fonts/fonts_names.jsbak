@@ -1,0 +1,114 @@
+//use it on server to register fonts
+//if you need to add so copy and use FONT name for file name (fontForge to help)
+
+const { registerFont, createCanvas } = require('canvas');
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+// Array to store registered fonts
+const registeredFonts = [];
+const fontFamilies = new Set(); // To track unique font names
+
+// Path to the fonts directory
+const fontDir = '/home/ubuntu/tchart_server/fonts';
+
+// Function to get the internal font family name using fontTools
+function getFontFamilyName(fontPath) {
+  try {
+    // Escape the font path to handle spaces correctly
+    const escapedFontPath = fontPath.replace(/'/g, "\\'");
+    const command = `python3 -c "from fontTools.ttLib import TTFont; font = TTFont('${escapedFontPath}'); print(font['name'].getName(1, 3, 1).toUnicode())"`;
+    const output = execSync(command).toString().trim();
+    return output || 'Unknown';
+  } catch (error) {
+    console.error(`Error retrieving font name for ${fontPath}:`, error.message);
+    return 'Unknown';
+  }
+}
+
+// Register all .ttf and .otf fonts
+fs.readdirSync(fontDir).forEach(file => {
+  if (file.match(/\.(ttf|otf)$/i)) {
+    const fontPath = path.join(fontDir, file);
+    try {
+      // Extract font name from file name (without extension)
+      const fontName = path.basename(file, path.extname(file));
+      // Get internal font name using fontTools
+      const internalFontName = getFontFamilyName(fontPath);
+      
+      if (!fontFamilies.has(internalFontName)) { // Skip duplicates based on internal name
+        // Register font with internal name
+        registerFont(fontPath, { family: internalFontName });
+        fontFamilies.add(internalFontName);
+        registeredFonts.push({ file, fontName, internalFontName });
+        console.log(`Font registered: "${fontName}" (file: ${file}, internal name: "${internalFontName}")`);
+      } else {
+        console.log(`Skipped duplicate: "${fontName}" (file: ${file}, internal name: "${internalFontName}")`);
+      }
+    } catch (error) {
+      console.error(`Error registering font ${file}:`, error.message);
+    }
+  }
+});
+
+// Display list of registered fonts
+console.log('\nList of registered fonts:');
+if (registeredFonts.length > 0) {
+  registeredFonts.forEach(({ fontName, internalFontName, file }) => {
+    console.log(`- File: ${file}, File name: "${fontName}", Internal name: "${internalFontName}"`);
+  });
+} else {
+  console.log('No fonts registered.');
+}
+
+// Optional: retrieve list of system fonts via fc-list
+try {
+  console.log('\nList of system fonts (via fc-list):');
+  const fcListOutput = execSync('fc-list').toString();
+  const systemFonts = fcListOutput
+    .split('\n')
+    .filter(line => line)
+    .map(line => {
+      const match = line.match(/:([^:]+):/);
+      return match ? match[1].trim() : null;
+    })
+    .filter(font => font)
+    .sort()
+    .filter((font, index, arr) => font !== arr[index - 1]);
+  systemFonts.forEach(font => console.log(`- "${font}"`));
+} catch (error) {
+  console.error('Error retrieving system fonts:', error.message);
+}
+
+// Test the "Anita semi square" font (using internal name)
+const anitaFont = registeredFonts.find(font => font.fontName === 'Computer-Speak');
+if (anitaFont) {
+  const canvas = createCanvas(200, 200);
+  const ctx = canvas.getContext('2d');
+  ctx.font = `37px "${anitaFont.internalFontName}"`;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText('Test', 10, 50);
+
+  // Check text metrics
+  const metrics = ctx.measureText('Test');
+  console.log(`\nText width ("${anitaFont.internalFontName}"): ${metrics.width}`);
+
+  // Compare with a system font
+  ctx.font = '37px "DejaVu Sans"';
+  const metricsDejaVu = ctx.measureText('Test');
+  console.log(`Text width (DejaVu Sans): ${metricsDejaVu.width}`);
+
+  if (Math.abs(metrics.width - metricsDejaVu.width) < 1) {
+    console.warn(`Warning: Font "${anitaFont.internalFontName}" may not be applied (text width matches DejaVu Sans).`);
+  } else {
+    console.log(`Font "${anitaFont.internalFontName}" successfully applied.`);
+  }
+
+  // Save the result
+  const buffer = canvas.toBuffer('image/png');
+  fs.writeFileSync('output.png', buffer);
+  console.log(`Test image with font "${anitaFont.internalFontName}" saved as output.png`);
+} else {
+  console.log('\nFont "Anita semi square" not found in registered fonts.');
+}

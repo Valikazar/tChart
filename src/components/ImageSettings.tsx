@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel } from '@mui/material';
+import { Box, Typography, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel, Paper } from '@mui/material';
 import SliderWithInput from './SliderWithInput';
 
 interface ImageSettingsProps {
@@ -11,6 +11,7 @@ interface ImageSettingsProps {
   rotation?: number;
   overlap?: number;
   hue?: number;
+  mirror?: boolean;
   onScaleChange: (scale: number) => void;
   onOffsetXChange: (offsetX: number) => void;
   onOffsetYChange: (offsetY: number) => void;
@@ -18,6 +19,7 @@ interface ImageSettingsProps {
   onRotationChange?: (rotation: number) => void;
   onOverlapChange?: (overlap: number) => void;
   onHueChange?: (hue: number) => void;
+  onMirrorChange?: (mirror: boolean) => void;
 }
 
 const ImageSettings: React.FC<ImageSettingsProps> = ({
@@ -29,6 +31,7 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
   rotation = 0,
   overlap = 2,
   hue = 0,
+  mirror = false,
   onScaleChange,
   onOffsetXChange,
   onOffsetYChange,
@@ -36,19 +39,39 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
   onRotationChange,
   onOverlapChange,
   onHueChange,
+  onMirrorChange,
 }) => {
+  // Принудительное преобразование всех числовых параметров
+  const safeScale = typeof scale === 'number' ? scale : parseFloat(scale) || 1;
+  const safeOffsetX = typeof offsetX === 'number' ? offsetX : parseInt(offsetX) || 0;
+  const safeOffsetY = typeof offsetY === 'number' ? offsetY : parseInt(offsetY) || 0;
+  const safeRotation = typeof rotation === 'number' ? rotation : parseInt(rotation) || 0;
+  const safeOverlap = typeof overlap === 'number' ? overlap : parseInt(overlap) || 2;
+  const safeHue = typeof hue === 'number' ? hue : parseInt(hue) || 0;
+  const safeMirror = !!mirror;
+  
+  // Принудительное преобразование всех числовых параметров обеспечивает корректную работу компонентов
+  
   return (
-    <Box>
+    <Paper
+      elevation={0}
+      sx={{
+        border: '10px solidrgb(150, 147, 117)',
+        borderRadius: 2,
+        p: 1.5,
+        backgroundColor: 'rgba(70, 37, 69, 0.73)'
+      }}
+    >
       <Box sx={{ mb: 1, minWidth: '200px' }}>
         <Typography variant="caption" gutterBottom>
           Scale
         </Typography>
         <SliderWithInput
-          value={scale}
+          value={safeScale}
           onChange={onScaleChange}
           min={0.1}
-          max={5}
-          step={0.05}
+          max={7.0}
+          step={0.005}
           isFloat={true}
         />
       </Box>
@@ -58,7 +81,7 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
             Color Balance
           </Typography>
           <SliderWithInput
-            value={hue}
+            value={safeHue}
             onChange={onHueChange}
             min={0}
             max={360}
@@ -67,12 +90,26 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
           />
         </Box>
       )}
+      {onMirrorChange && (
+        <Box sx={{ mb: 1, minWidth: '200px' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={safeMirror}
+                onChange={(e) => onMirrorChange(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Mirrored"
+          />
+        </Box>
+      )}
       {isBody && onStartFromChange && (
         <Box sx={{ mb: 1, minWidth: '200px' }}>
           <FormControl fullWidth size="small">
             <InputLabel>Start From</InputLabel>
             <Select
-              value={startFrom}
+              value={startFrom || 'top'}
               label="Start From"
               onChange={(e) => onStartFromChange(e.target.value as 'top' | 'bottom' | 'fill')}
             >
@@ -89,11 +126,11 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
             Overlap (%)
           </Typography>
           <SliderWithInput
-            value={overlap}
+            value={safeOverlap}
             onChange={onOverlapChange}
             min={0}
             max={50}
-            step={1}
+            step={0.05}
             isFloat={false}
           />
         </Box>
@@ -103,11 +140,11 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
           X Offset
         </Typography>
         <SliderWithInput
-          value={offsetX}
+          value={safeOffsetX}
           onChange={onOffsetXChange}
-          min={-100}
-          max={100}
-          step={1}
+          min={-120}
+          max={120}
+          step={0.2}
         />
       </Box>
       {!isBody && (
@@ -116,11 +153,11 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
             Y Offset
           </Typography>
           <SliderWithInput
-            value={offsetY}
+            value={safeOffsetY}
             onChange={onOffsetYChange}
-            min={-100}
-            max={100}
-            step={1}
+            min={-120}
+            max={120}
+            step={0.2}
           />
         </Box>
       )}
@@ -130,7 +167,7 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
             Rotation
           </Typography>
           <SliderWithInput
-            value={rotation}
+            value={safeRotation}
             onChange={onRotationChange}
             min={-180}
             max={180}
@@ -138,7 +175,7 @@ const ImageSettings: React.FC<ImageSettingsProps> = ({
           />
         </Box>
       )}
-    </Box>
+    </Paper>
   );
 };
 

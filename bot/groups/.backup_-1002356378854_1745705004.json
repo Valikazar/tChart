@@ -1,0 +1,64 @@
+{
+  "background": {
+    "color": "#000000",
+    "opacity": 0.5,
+    "image": {
+      "url": "",
+      "scale": 1,
+      "offsetX": 0,
+      "offsetY": 0
+    }
+  },
+  "overlay": {
+    "color": "#000000"
+  },
+  "font": {
+    "family": "Arial",
+    "size": 40,
+    "color": "#ffffff"
+  },
+  "display": {
+    "showMarketCap": true,
+    "showPrice": true,
+    "showTimeline": true,
+    "showPriceChange": true,
+    "showTokenName": true,
+    "showMinMax": true
+  },
+  "upBar": {
+    "color": "#26a69a",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "downBar": {
+    "color": "#ef5350",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "candle": {
+    "color": "#00ff00",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "knife": {
+    "color": "#FF0700",
+    "lineWidth": 1,
+    "borderWidth": 0,
+    "borderStyle": "inside",
+    "borderColor": "#FFFFFF"
+  },
+  "network": "polygon",
+  "poolAddress": "0xa030be97a53d6462c675962fec3eafbe53b8bb6c",
+  "duration": 2,
+  "numBars": 20,
+  "interval": "hour",
+  "minimal_duration": 0.2,
+  "last_poster_time": 1745704829.9778125,
+  "free": false
+}

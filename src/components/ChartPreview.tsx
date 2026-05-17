@@ -1,91 +1,15 @@
-import React, { useEffect, useRef, useCallback, useMemo, useState } from 'react';
-import { Box, Typography } from '@mui/material';
-import { ChartConfig, ExtendedBarConfig } from '../types';
+// ChartPreview.tsx
+import React, { useEffect, useRef, useMemo, useState, useImperativeHandle, forwardRef } from 'react';
+import { Box, Typography, useTheme, useMediaQuery } from '@mui/material';
+import { ChartConfig, OverlayItem } from './types';
+import { drawChart } from './drawChart';
+import { createUniversalCanvas } from './canvasAbstraction';
 
-// Кэш для изображений
-const imageCache = new Map<string, HTMLImageElement>();
-// Cache for images with applied color balance
-const hueImageCache = new Map<string, HTMLCanvasElement>();
-
-// Function for applying color balance to image
-const applyHueToImage = (img: HTMLImageElement, hue: number): HTMLCanvasElement => {
-  // Create a unique key for hue cache
-  const cacheKey = `${img.src}_hue_${hue}`;
-  
-  // Check if such image already exists in cache
-  if (hueImageCache.has(cacheKey)) {
-    return hueImageCache.get(cacheKey)!;
-  }
-  
-  // Create temporary canvas for filter application
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = img.width;
-  tempCanvas.height = img.height;
-  const tempCtx = tempCanvas.getContext('2d')!;
-  
-  // Draw original image
-  tempCtx.drawImage(img, 0, 0);
-  
-  // If hue is not specified or equals 0, return original image
-  if (!hue) {
-    hueImageCache.set(cacheKey, tempCanvas);
-    return tempCanvas;
-  }
-  
-  // Get image data
-  const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-  const data = imageData.data;
-  
-  // Convert hue value to RGB color
-  // We'll use hue in range 0-360 to generate a color
-  const hueRadian = hue * Math.PI / 180;
-  
-  // Calculate color to blend based on hue angle (using color wheel)
-  const colorToBlend = {
-    r: Math.round(127.5 * (1 + Math.cos(hueRadian))),
-    g: Math.round(127.5 * (1 + Math.cos(hueRadian - 2 * Math.PI / 3))),
-    b: Math.round(127.5 * (1 + Math.cos(hueRadian - 4 * Math.PI / 3)))
-  };
-  
-  // Apply color blend to each pixel, including white and gray
-  for (let i = 0; i < data.length; i += 4) {
-    // Skip fully transparent pixels
-    if (data[i + 3] === 0) continue;
-    
-    // Get original RGB values
-    const originalR = data[i];
-    const originalG = data[i + 1];
-    const originalB = data[i + 2];
-    
-    // Calculate blend factor based on luminance
-    const luminance = 0.299 * originalR + 0.587 * originalG + 0.114 * originalB;
-    const normalizedLuminance = luminance / 255;
-    
-    // Higher blend factor for brighter pixels, so white and gray are affected more
-    // This ensures white/gray get more color than darker pixels
-    const baseFactor = 0.1; // Base blend amount
-    const brightnessFactor = Math.pow(normalizedLuminance, 0.5) * 0.5; // More effect on bright pixels
-    const blendFactor = Math.min(baseFactor + brightnessFactor, 0.8); // Cap at 80% to preserve some original
-    
-    // Blend the original color with the hue color
-    data[i] = Math.round(originalR * (1 - blendFactor) + colorToBlend.r * blendFactor);
-    data[i + 1] = Math.round(originalG * (1 - blendFactor) + colorToBlend.g * blendFactor);
-    data[i + 2] = Math.round(originalB * (1 - blendFactor) + colorToBlend.b * blendFactor);
-  }
-  
-  // Apply updated data back to canvas
-  tempCtx.putImageData(imageData, 0, 0);
-  
-  // Save to cache and return
-  hueImageCache.set(cacheKey, tempCanvas);
-  return tempCanvas;
-};
-
-// Демо-данные для превью
+// Demo data
 const DEMO_DATA = Array.from({ length: 24 }, (_, i) => {
   const now = Math.floor(Date.now() / 1000);
-  const timestamp = now - (24 - i) * 3600; // Каждый элемент с интервалом в 1 час, начиная с 24 часа назад
-  const basePrice = 0.00000450;
+  const timestamp = now - (24 - i) * 3600;
+  const basePrice = 135.0;
   const volatility = 0.00000050;
   const open = basePrice + (Math.random() - 0.5) * volatility;
   const close = basePrice + (Math.random() - 0.5) * volatility;
@@ -94,9 +18,8 @@ const DEMO_DATA = Array.from({ length: 24 }, (_, i) => {
   return [timestamp, open, high, low, close];
 });
 
-// Демо-данные для информации о токене
 const DEMO_TOKEN_INFO = {
-  priceUsd: 0.00000450,
+  priceUsd: 135.0,
   marketCap: 999000,
   priceChange: {
     '5m': 3.14,
@@ -104,25 +27,10 @@ const DEMO_TOKEN_INFO = {
     '6h': 0.00,
     '24h': 15.75,
   },
-  name: 'Demo Token'
+  name: 'Token',
 };
 
-// Функция для предзагрузки изображения
-const preloadImage = (url: string): Promise<HTMLImageElement> => {
-  if (imageCache.has(url)) {
-    return Promise.resolve(imageCache.get(url)!);
-  }
 
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      imageCache.set(url, img);
-      resolve(img);
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-};
 
 interface ChartPreviewProps {
   config: ChartConfig;
@@ -145,12 +53,18 @@ interface ChartPreviewProps {
   tokenName?: string;
   isPreview?: boolean;
   showTokenInfo?: boolean;
+  isEnhanced?: boolean;
+  overlays?: OverlayItem[];
+  onOverlaysChange?: (items: OverlayItem[]) => void;
+  selectedOverlayId?: string | null;
+  onSelectOverlay?: (id: string | null) => void;
 }
 
-/**
- * Компонент для отображения графика криптовалюты
- */
-const ChartPreview: React.FC<ChartPreviewProps> = ({
+export interface ChartPreviewHandle {
+  deselectAll: () => void;
+}
+
+const ChartPreview = React.forwardRef<ChartPreviewHandle, ChartPreviewProps>(({
   config,
   data,
   tokenInfo,
@@ -160,753 +74,447 @@ const ChartPreview: React.FC<ChartPreviewProps> = ({
   id = 'chart-canvas',
   tokenName,
   isPreview = false,
-  showTokenInfo = true
-}) => {
-  // Используем демо данные для превью или если не переданы реальные данные
+  showTokenInfo = true,
+  isEnhanced = false,
+  overlays = [],
+  onOverlaysChange,
+  selectedOverlayId,
+  onSelectOverlay,
+}, ref) => {
+  const theme = useTheme();
+  // On desktop (md and up), use smaller handles (2.5), otherwise use larger (5.0)
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+
+  // UI handle scaling
+  const HANDLE_SCALE = isDesktop ? 2.5 : 5.0;
+  const HANDLE_RADIUS = 16 * HANDLE_SCALE;
+  const HANDLE_FONT_PX = Math.round(22 * HANDLE_SCALE);
+  const HANDLE_STROKE = Math.max(2, Math.round(2 * HANDLE_SCALE));
+  const HIT_RADIUS = 18 * HANDLE_SCALE;
   const chartData = useMemo(() => (isPreview || !data || data.length === 0) ? DEMO_DATA : data, [data, isPreview]);
   const chartTokenInfo = useMemo(() => (isPreview || !tokenInfo) ? DEMO_TOKEN_INFO : tokenInfo, [tokenInfo, isPreview]);
-  
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const bufferCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number>();
-  const isDrawingRef = useRef(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Мемоизируем функции для предотвращения ненужных перерисовок
-  const priceToY = useCallback((price: number | string, height: number, minPrice: number, priceRange: number, topMargin: number, bottomMargin: number) => {
-    const safePrice = typeof price === 'string' ? parseFloat(price) : price || 0;
-    return height - bottomMargin - ((safePrice - minPrice) / priceRange) * (height - topMargin - bottomMargin);
-  }, []);
+  // Overlay interaction state
+  const imagesCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
+  const selectedIdRef = useRef<string | null>(null);
 
-  const indexToX = useCallback((i: number, chartLeftMargin: number, barWidth: number, gap: number) => {
-    return chartLeftMargin + i * (barWidth + gap);
-  }, []);
-
-  // Создаем буферный канвас при монтировании компонента
+  // Sync selectedIdRef with prop if provided
   useEffect(() => {
-    bufferCanvasRef.current = document.createElement('canvas');
+    if (selectedOverlayId !== undefined) {
+      selectedIdRef.current = selectedOverlayId;
+      drawOverlays();
+    }
+  }, [selectedOverlayId]);
+
+  const dragModeRef = useRef<'move' | 'scale' | 'rotate' | 'none'>('none');
+  const dragStartRef = useRef<{ x: number; y: number; item?: OverlayItem; angle?: number; dist?: number } | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    deselectAll: () => {
+      selectedIdRef.current = null;
+      if (onSelectOverlay) onSelectOverlay(null); // Keep parent in sync
+      drawOverlays();
+    }
+  }));
+
+  useEffect(() => {
+    if (!canvasRef.current || (!isPreview && (!data || data.length === 0))) {
+      setIsLoading(false);
+      return;
+    }
+
+    const canvas = canvasRef.current!;
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
+    // Сохраняем текущую конфигурацию в data-атрибуте canvas
+    try {
+      canvas.dataset.config = JSON.stringify(config);
+    } catch (e) {
+      console.error('Error saving config to canvas dataset:', e);
+    }
+
+    animationFrameRef.current = requestAnimationFrame(() => {
+      drawChart({
+        canvas,
+        config,
+        data: chartData,
+        tokenInfo: chartTokenInfo,
+        interval,
+        width,
+        height,
+        tokenName,
+        isEnhanced,
+      })
+        .then(() => setIsLoading(false))
+        .catch((err) => {
+          console.error('Error rendering chart:', err);
+          setError(err instanceof Error ? err.message : 'Error rendering chart');
+          setIsLoading(false);
+        });
+    });
+
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      // Clear cache of images with applied color balance on component unmount
-      hueImageCache.clear();
     };
-  }, []);
+  }, [config, chartData, chartTokenInfo, interval, width, height, tokenName, isPreview, isEnhanced]);
 
-  // Основная функция отрисовки
-  const drawChart = useCallback(async () => {
-    const canvas = canvasRef.current;
-    const bufferCanvas = bufferCanvasRef.current;
-    if (!canvas || !bufferCanvas || !chartData || chartData.length === 0 || isDrawingRef.current) return;
-
-    isDrawingRef.current = true;
-
-    try {
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-      const bufferCtx = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
-      if (!ctx || !bufferCtx) return;
-
-      // Устанавливаем размеры буферного канваса
-      bufferCanvas.width = canvas.width;
-      bufferCanvas.height = canvas.height;
-
-      // Параметры графика
-      const leftMargin = 100;
-      const rightMargin = 100;
-      const topMargin = 70;
-      const bottomMargin = 180;
-
-      const chartLeftMargin = leftMargin / 2;
-      const chartRightMargin = rightMargin / 2;
-
-      const totalWidth = canvas.width - chartLeftMargin - chartRightMargin;
-      const barWidth = totalWidth / (chartData.length * 1.15);
-      const gap = barWidth * 0.15;
-
-      const numBars = chartData.length;
-      const lineScale = Math.min(width, height) / 1280; // Базовое масштабирование относительно размера 1280
-      const barScale = numBars / 15; // Масштабирование относительно стандартного количества баров (24)
-
-      // Находим минимальную и максимальную цены
-      const prices = chartData.flatMap(([_, o, h, l, c]) => [
-        typeof o === 'string' ? parseFloat(o) : o || 0,
-        typeof h === 'string' ? parseFloat(h) : h || 0,
-        typeof l === 'string' ? parseFloat(l) : l || 0,
-        typeof c === 'string' ? parseFloat(c) : c || 0
-      ]);
-      const maxPrice = Math.max(...prices);
-      const minPrice = Math.min(...prices);
-      const priceRange = maxPrice - minPrice;
-
-      // Очищаем буферный канвас
-      bufferCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
-
-      // Отрисовка фона
-      if (config.background.image?.url) {
-        try {
-          const backgroundImg = await preloadImage(config.background.image.url);
-          bufferCtx.drawImage(backgroundImg, 0, 0, bufferCanvas.width, bufferCanvas.height);
-
-          if (config.overlay?.color) {
-            bufferCtx.save();
-            bufferCtx.fillStyle = config.overlay.color;
-            bufferCtx.globalAlpha = config.background.opacity || 0;
-            bufferCtx.fillRect(0, 0, bufferCanvas.width, bufferCanvas.height);
-            bufferCtx.restore();
-          }
-        } catch (error) {
-          console.error('Error loading background image:', error);
-        }
-      } else {
-        bufferCtx.fillStyle = config.background.color || '#000000';
-        bufferCtx.fillRect(0, 0, bufferCanvas.width, bufferCanvas.height);
-      }
-
-      // Отрисовка баров
-      const drawBars = async () => {
-        // Массив для хранения center изображений
-        const centerImages: Array<{
-          x: number;
-          y: number;
-          config: any;
-          barWidth: number;
-        }> = [];
-
-        for (let i = 0; i < chartData.length; i++) {
-          const [timestamp, open, high, low, close] = chartData[i];
-          const x = indexToX(i, chartLeftMargin, barWidth, gap);
-          const y_open = priceToY(open, bufferCanvas.height, minPrice, priceRange, topMargin, bottomMargin);
-          const y_close = priceToY(close, bufferCanvas.height, minPrice, priceRange, topMargin, bottomMargin);
-          const y_high = priceToY(high, bufferCanvas.height, minPrice, priceRange, topMargin, bottomMargin);
-          const y_low = priceToY(low, bufferCanvas.height, minPrice, priceRange, topMargin, bottomMargin);
-
-          const isUpBar = y_close > y_open;
-          const barHeight = Math.abs(y_close - y_open);
-          const heightThreshold = 300;
-
-          const useCandle = !isUpBar && barHeight > heightThreshold;
-          const useKnife = isUpBar && barHeight > heightThreshold;
-          const barConfig = useCandle ? config.candle : useKnife ? config.knife : !isUpBar ? config.upBar : config.downBar;
-
-          // Определяем направление заполнения для body в зависимости от типа бара
-          const fillDirection = (useCandle || (!isUpBar)) ? 'bottom-to-top' : 'top-to-bottom';
-
-          // Добавляем center изображение в массив для последующей отрисовки
-          if ((useCandle || useKnife) && (barConfig as ExtendedBarConfig).center?.url) {
-            centerImages.push({
-              x,
-              y: (y_open + y_close) / 2,
-              config: (barConfig as ExtendedBarConfig).center,
-              barWidth
-            });
-          }
-
-          // Отрисовка линии high/low
-          if ((barConfig.lineWidth || 0) > 0) {
-            bufferCtx.beginPath();
-            bufferCtx.strokeStyle = barConfig.lineColor || barConfig.color;
-            bufferCtx.lineWidth = (barConfig.lineWidth || 1) * lineScale / barScale;
-            bufferCtx.moveTo(x + barWidth / 2, y_high);
-            bufferCtx.lineTo(x + barWidth / 2, y_low);
-            bufferCtx.stroke();
-          }
-
-          // Отрисовка тела бара
-          bufferCtx.save();
-          bufferCtx.beginPath();
-          bufferCtx.rect(x, Math.min(y_open, y_close), barWidth, Math.abs(y_close - y_open));
-          bufferCtx.clip();
-
-          if (barConfig.body?.url) {
-            try {
-              const bodyImg = await preloadImage(barConfig.body.url);
-              const bodyHeight = Math.max(1, Math.abs(barHeight));
-              const bodyWidth = Math.max(1, barWidth);
-              const bodyY = Math.min(y_open, y_close);
-              const scale = barConfig.body?.scale || 1;
-              const rotation = barConfig.body?.rotation || 0;
-              const offsetX = barConfig.body?.offsetX || 0;
-              const startFrom = barConfig.body?.startFrom || 'top';
-              const overlap = barConfig.body?.overlap !== undefined ? barConfig.body.overlap / 100 : 0.02;
-              const hue = barConfig.body?.hue || 0;
-
-              // Apply color balance to image if specified
-              const processedImg = hue ? applyHueToImage(bodyImg, hue) : bodyImg;
-
-              // Создаем временный канвас для поворота изображения
-              const tempCanvas = document.createElement('canvas');
-              const tempCtx = tempCanvas.getContext('2d');
-              if (!tempCtx) return;
-
-              // Установка размеров с учетом поворота
-              const diagonal = Math.sqrt(bodyImg.width * bodyImg.width + bodyImg.height * bodyImg.height);
-              tempCanvas.width = diagonal;
-              tempCanvas.height = diagonal;
-
-              // Рисуем повернутое изображение в центре
-              tempCtx.save();
-              tempCtx.translate(diagonal / 2, diagonal / 2);
-              tempCtx.rotate((rotation * Math.PI) / 180);
-              tempCtx.drawImage(processedImg, -bodyImg.width / 2, -bodyImg.height / 2);
-              tempCtx.restore();
-
-              // Находим новые размеры повернутого изображения
-              const rotatedWidth = Math.abs(bodyImg.width * Math.cos(rotation * Math.PI / 180)) + 
-                                   Math.abs(bodyImg.height * Math.sin(rotation * Math.PI / 180));
-              const rotatedHeight = Math.abs(bodyImg.width * Math.sin(rotation * Math.PI / 180)) + 
-                                    Math.abs(bodyImg.height * Math.cos(rotation * Math.PI / 180));
-
-              // Масштабируем с учетом соотношения сторон
-              const imgRatio = rotatedWidth / rotatedHeight;
-              const scaledWidth = bodyWidth;
-              const scaledHeight = scaledWidth / imgRatio;
-
-              // Применяем пользовательский масштаб
-              const finalScaledHeight = scaledHeight * scale;
-              
-              if (startFrom === 'fill') {
-                // Режим заполнения с сохранением тайлов
-                
-                // Вычисляем, сколько целых тайлов поместится по высоте с учетом нахлёста
-                const visibleTileHeight = finalScaledHeight * (1 - overlap);
-                const numTilesFloat = bodyHeight / visibleTileHeight;
-                const numTiles = Math.floor(numTilesFloat); // Округляем вниз для целого числа тайлов
-                
-                if (numTiles <= 1) {
-                  // Если помещается только один тайл или меньше, масштабируем изображение по высоте
-                  bufferCtx.drawImage(
-                    tempCanvas,
-                    (tempCanvas.width - rotatedWidth) / 2,
-                    (tempCanvas.height - rotatedHeight) / 2,
-                    rotatedWidth,
-                    rotatedHeight,
-                    x + offsetX * lineScale / barScale,
-                    bodyY,
-                    bodyWidth,
-                    bodyHeight
-                  );
-                } else {
-                  // Если помещается больше одного тайла, распределяем их равномерно
-                  
-                  // Вычисляем фактическую высоту всех тайлов с учетом нахлёста
-                  const totalTilesHeight = numTiles * finalScaledHeight - (numTiles - 1) * (finalScaledHeight * overlap);
-                  
-                  // Масштабируем все тайлы вместе, чтобы заполнить всю высоту бара
-                  const scaleFactor = bodyHeight / totalTilesHeight;
-                  const adjustedTileHeight = finalScaledHeight * scaleFactor;
-                  
-                  // Рисуем тайлы с масштабированием в зависимости от типа бара
-                  for (let j = 0; j < numTiles; j++) {
-                    let tileIndex = j;
-                    
-                    // Для candle и up заполнение снизу вверх (обратный порядок тайлов)
-                    if (fillDirection === 'bottom-to-top') {
-                      tileIndex = numTiles - j - 1;
-                    }
-                    
-                    const tileY = bodyY + tileIndex * adjustedTileHeight * (1 - overlap);
-                    
-                    bufferCtx.drawImage(
-                      tempCanvas,
-                      (tempCanvas.width - rotatedWidth) / 2,
-                      (tempCanvas.height - rotatedHeight) / 2,
-                      rotatedWidth,
-                      rotatedHeight,
-                      x + offsetX * lineScale / barScale,
-                      tileY,
-                      bodyWidth,
-                      adjustedTileHeight
-                    );
-                  }
-                }
-              } else {
-                // Режим тайлинга (top или bottom) с учетом типа бара и опции startFrom
-                
-                // Вычисляем высоту видимой части тайла (без нахлёста)
-                const visibleTileHeight = finalScaledHeight * (1 - overlap);
-                
-                // Вычисляем количество тайлов, необходимое для заполнения высоты бара
-                const numTilesFloat = bodyHeight / visibleTileHeight;
-                const numTiles = Math.ceil(numTilesFloat);
-                
-                // Вычисляем общую высоту всех тайлов с учетом нахлёста
-                const totalHeight = numTiles * finalScaledHeight - (numTiles - 1) * (finalScaledHeight * overlap);
-                
-                // Определяем смещение в зависимости от опции startFrom и типа бара
-                let verticalOffset = 0;
-                
-                // Направление отрисовки: приоритет у типа бара (candle/up снизу вверх, down/knife сверху вниз)
-                const drawDirection = fillDirection;
-                
-                // Привязка начала (и смещение) исходя из опции startFrom
-                if (startFrom === 'top') {
-                  // При startFrom = top, верхний тайл начинается от верхней границы бара
-                  verticalOffset = 0;
-                } else if (startFrom === 'bottom') {
-                  // При startFrom = bottom, нижний тайл начинается от нижней границы бара
-                  verticalOffset = totalHeight - bodyHeight;
-                } else {
-                  // Центрирование (если вдруг появятся новые опции)
-                  verticalOffset = (totalHeight - bodyHeight) / 2;
-                }
-                
-                // Рендерим тайлы с учетом направления отрисовки и привязки начала
-                for (let j = 0; j < numTiles; j++) {
-                  let tileIndex = j;
-                  
-                  // Направление отрисовки (снизу вверх или сверху вниз) определяется типом бара
-                  if (drawDirection === 'bottom-to-top') {
-                    tileIndex = numTiles - j - 1;
-                  }
-                  
-                  // Начальная позиция первого тайла в зависимости от привязки
-                  let tileY;
-                  if (startFrom === 'top') {
-                    // Для top - первый тайл начинается от верхней границы (bodyY)
-                    tileY = bodyY + tileIndex * finalScaledHeight * (1 - overlap);
-                  } else if (startFrom === 'bottom') {
-                    // Для bottom - последний тайл заканчивается у нижней границы (bodyY + bodyHeight)
-                    const bottomPos = bodyY + bodyHeight;
-                    tileY = bottomPos - finalScaledHeight - tileIndex * finalScaledHeight * (1 - overlap);
-                  } else {
-                    // Центрирование (для возможных будущих опций)
-                    tileY = bodyY - verticalOffset + tileIndex * finalScaledHeight * (1 - overlap);
-                  }
-                  
-                  // Пропускаем тайлы, которые полностью находятся за пределами видимой области
-                  if (tileY + finalScaledHeight < bodyY || tileY > bodyY + bodyHeight) {
-                    continue;
-                  }
-                  
-                  // Вычисляем часть изображения, которую нужно отрисовать
-                  let sourceY = (tempCanvas.height - rotatedHeight) / 2;
-                  let sourceHeight = rotatedHeight;
-                  let destY = tileY;
-                  let destHeight = finalScaledHeight;
-                  
-                  // Если тайл выходит за верхнюю границу бара, обрезаем его сверху
-                  // Но не обрезаем, если это первый тайл при startFrom = top
-                  if (destY < bodyY && !(startFrom === 'top' && 
-                      ((drawDirection === 'top-to-bottom' && j === 0) || 
-                       (drawDirection === 'bottom-to-top' && j === numTiles - 1)))) {
-                    const clipTop = bodyY - destY;
-                    const sourceClipRatio = clipTop / destHeight;
-                    sourceY += sourceHeight * sourceClipRatio;
-                    sourceHeight -= sourceHeight * sourceClipRatio;
-                    destHeight -= clipTop;
-                    destY = bodyY;
-                  }
-                  
-                  // Если тайл выходит за нижнюю границу бара, обрезаем его снизу
-                  // Но не обрезаем, если это последний тайл при startFrom = bottom
-                  if (destY + destHeight > bodyY + bodyHeight && !(startFrom === 'bottom' && 
-                      ((drawDirection === 'top-to-bottom' && j === numTiles - 1) || 
-                       (drawDirection === 'bottom-to-top' && j === 0)))) {
-                    const clipBottom = (destY + destHeight) - (bodyY + bodyHeight);
-                    const sourceClipRatio = clipBottom / destHeight;
-                    sourceHeight -= sourceHeight * sourceClipRatio;
-                    destHeight -= clipBottom;
-                  }
-                  
-                  // Отрисовываем тайл с учетом всех вычисленных параметров
-                  bufferCtx.drawImage(
-                    tempCanvas,
-                    (tempCanvas.width - rotatedWidth) / 2,
-                    sourceY,
-                    rotatedWidth,
-                    sourceHeight,
-                    x + offsetX * lineScale / barScale,
-                    destY,
-                    bodyWidth,
-                    destHeight
-                  );
-                }
-              }
-            } catch (error) {
-              console.error('Error loading body image:', error);
-              bufferCtx.fillStyle = barConfig.color;
-              bufferCtx.fillRect(x, Math.min(y_open, y_close), barWidth, Math.abs(y_close - y_open));
-            }
-          } else {
-            bufferCtx.fillStyle = barConfig.color;
-            bufferCtx.fillRect(x, Math.min(y_open, y_close), barWidth, Math.abs(y_close - y_open));
-          }
-
-          bufferCtx.restore();
-
-          // Отрисовка границ
-          if ((barConfig.borderWidth || 0) > 0) {
-            bufferCtx.strokeStyle = barConfig.borderColor || barConfig.color;
-            const borderWidth = (barConfig.borderWidth || 1) * lineScale / barScale;
-            bufferCtx.lineWidth = borderWidth;
-            
-            if (barConfig.borderStyle === 'inside') {
-              const halfBorder = borderWidth / 2;
-              bufferCtx.strokeRect(
-                x + halfBorder,
-                Math.min(y_open, y_close) + halfBorder,
-                barWidth - borderWidth,
-                Math.abs(y_close - y_open) - borderWidth
-              );
-            } else {
-              const offset = borderWidth / 2;
-              bufferCtx.strokeRect(
-                x - offset,
-                Math.min(y_open, y_close) - offset,
-                barWidth + borderWidth,
-                Math.abs(y_close - y_open) + borderWidth
-              );
-            }
-          }
-
-          // Отрисовка top и bottom изображений
-          for (const part of ['top', 'bottom'] as const) {
-            const imgConfig = barConfig[part];
-            if (imgConfig?.url) {
-              try {
-                const img = await preloadImage(imgConfig.url);
-                const scale = (imgConfig.scale || 1) * lineScale / barScale;
-                const offsetX = (imgConfig.offsetX || 0) * lineScale / barScale;
-                const offsetY = (imgConfig.offsetY || 0) * lineScale / barScale;
-                const rotation = imgConfig.rotation || 0;
-                const hue = imgConfig.hue || 0;
-                
-                // Apply color balance to image if specified
-                const processedImg = hue ? applyHueToImage(img, hue) : img;
-                
-                const scaledWidth = img.width * scale;
-                const scaledHeight = img.height * scale;
-                
-                bufferCtx.save();
-                // Перемещаем точку вращения в центр изображения
-                const centerX = x + (barWidth - scaledWidth) / 2 + offsetX + scaledWidth / 2;
-                const centerY = part === 'top' ? Math.min(y_open, y_close) - scaledHeight + offsetY + scaledHeight / 2 : Math.max(y_open, y_close) + offsetY + scaledHeight / 2;
-                bufferCtx.translate(centerX, centerY);
-                bufferCtx.rotate((rotation * Math.PI) / 180);
-                bufferCtx.translate(-scaledWidth / 2, -scaledHeight / 2);
-                
-                bufferCtx.drawImage(
-                  processedImg,
-                  0,
-                  0,
-                  scaledWidth,
-                  scaledHeight
-                );
-                bufferCtx.restore();
-              } catch (error) {
-                console.error(`Error loading ${part} image:`, error);
-              }
-            }
-          }
-        }
-
-        // Отрисовываем center изображения поверх всех баров
-        for (const { x, y, config: imgConfig, barWidth } of centerImages) {
-          try {
-            const img = await preloadImage(imgConfig.url);
-            const scale = (imgConfig.scale || 1) * lineScale / barScale;
-            const offsetX = (imgConfig.offsetX || 0) * lineScale / barScale;
-            const offsetY = (imgConfig.offsetY || 0) * lineScale / barScale;
-            const rotation = imgConfig.rotation || 0;
-            const hue = imgConfig.hue || 0;
-            
-            // Apply color balance to image if specified
-            const processedImg = hue ? applyHueToImage(img, hue) : img;
-            
-            const scaledWidth = img.width * scale;
-            const scaledHeight = img.height * scale;
-
-            bufferCtx.save();
-            // Перемещаем точку вращения в центр изображения
-            const centerX = x + (barWidth - scaledWidth) / 2 + offsetX + scaledWidth / 2;
-            const centerY = y - scaledHeight / 2 + offsetY + scaledHeight / 2;
-            bufferCtx.translate(centerX, centerY);
-            bufferCtx.rotate((rotation * Math.PI) / 180);
-            bufferCtx.translate(-scaledWidth / 2, -scaledHeight / 2);
-
-            bufferCtx.drawImage(
-              processedImg,
-              0,
-              0,
-              scaledWidth,
-              scaledHeight
-            );
-            bufferCtx.restore();
-          } catch (error) {
-            console.error('Error loading center image:', error);
-          }
-        }
-      };
-
-      await drawBars();
-
-      // Отрисовка текста и меток времени
-      bufferCtx.font = `${config.font.size}px ${config.font.family}`;
-      bufferCtx.fillStyle = config.font.color;
-      bufferCtx.textBaseline = 'top';
-
-      // Временные метки
-      const timeLabels = Array.from({ length: 5 }, (_, i) => {
-        if (i === 4) return 'Now';
-        const timestamp = chartData[0][0] + ((chartData[chartData.length - 1][0] - chartData[0][0]) * i) / 4;
-        const timeDiffInSeconds = chartData[chartData.length - 1][0] - timestamp;
-        const hoursAgo = Math.round(timeDiffInSeconds / 3600);
-        return interval === 'day' ? `${Math.round(hoursAgo / 24)}D ago` : `${hoursAgo}h ago`;
-      });
-
-      const labelPositions = Array.from({ length: timeLabels.length }, (_, i) => {
-        // Добавляем отступ для первой и последней метки, чтобы они не выходили за границы
-        if (i === 0) {
-          return leftMargin + 10; // Добавляем отступ для первой метки
-        } else if (i === timeLabels.length - 1) {
-          return bufferCanvas.width - rightMargin - 10; // Добавляем отступ для последней метки
-        } else {
-          return leftMargin + i * (bufferCanvas.width - leftMargin - rightMargin) / (timeLabels.length - 1);
-        }
-      });
-
-      // Отрисовка MC и Price
-      bufferCtx.font = `${config.font.size}px ${config.font.family}`;
-      bufferCtx.fillStyle = config.font.color;
-      bufferCtx.textBaseline = 'top';
-
-      // Форматируем market cap
-      const formatMarketCap = (value: number) => {
-        if (value >= 1e9) {
-          return `MC: $${(value / 1e9).toFixed(2)}B`;
-        } else if (value >= 1e6) {
-          return `MC: $${(value / 1e6).toFixed(2)}M`;
-        } else if (value >= 1e3) {
-          return `MC: $${(value / 1e3).toFixed(2)}K`;
-        } else {
-          return `MC: $${value.toFixed(2)}`;
-        }
-      };
-
-      // Добавляем тень для текста
-      bufferCtx.shadowColor = 'black';
-      bufferCtx.shadowBlur = 4;
-      bufferCtx.shadowOffsetX = 2;
-      bufferCtx.shadowOffsetY = 2;
-
-      // Определяем topOffset для всех элементов
-      const topOffset = Math.round(bufferCanvas.height * 0.01);
-
-      // Определяем изменения цены
-      const changes = [
-        { period: '5M', value: chartTokenInfo.priceChange['5m'] },
-        { period: '1H', value: chartTokenInfo.priceChange['1h'] },
-        { period: '6H', value: chartTokenInfo.priceChange['6h'] },
-        { period: '24H', value: chartTokenInfo.priceChange['24h'] }
-      ];
-
-      // Отрисовка имени токена и MC
-      if (config.display.showTokenName) {
-        const tokenNameText = chartTokenInfo?.name || tokenName || 'Token';
-        bufferCtx.fillText(tokenNameText, leftMargin / 2, topOffset);
-        
-        if (config.display.showMarketCap) {
-          const mcText = formatMarketCap(chartTokenInfo.marketCap);
-          const tokenNameWidth = bufferCtx.measureText(tokenNameText).width;
-          bufferCtx.fillText(mcText, leftMargin / 2 + tokenNameWidth + 20, topOffset);
-        }
-      } else if (config.display.showMarketCap) {
-        const mcText = formatMarketCap(chartTokenInfo.marketCap);
-        bufferCtx.fillText(mcText, leftMargin / 2, topOffset);
-      }
-
-      // Отрисовка Price
-      if (config.display.showPrice) {
-        const priceText = `Price: $${chartTokenInfo.priceUsd.toFixed(8)}`;
-        const priceWidth = bufferCtx.measureText(priceText).width;
-        // Размещаем текст справа вверху
-        bufferCtx.fillText(priceText, bufferCanvas.width - (rightMargin / 2) - priceWidth, topOffset);
-
-        // Отрисовка Min/Max если включено
-        if (config.display.showMinMax) {
-          const minPrice = Math.min(...chartData.map(item => parseFloat(item[3])));
-          const maxPrice = Math.max(...chartData.map(item => parseFloat(item[2])));
-          const minMaxText = `Min/max: $${minPrice.toFixed(6)} / $${maxPrice.toFixed(7)}`;
-          bufferCtx.font = `${config.font.size * 0.8}px ${config.font.family}`;
-          // Размещаем текст Min/Max под текстом Price
-          const minMaxWidth = bufferCtx.measureText(minMaxText).width;
-          bufferCtx.fillText(minMaxText, bufferCanvas.width - (rightMargin / 2) - minMaxWidth, topOffset + config.font.size * 1.2);
-          bufferCtx.font = `${config.font.size}px ${config.font.family}`; // Восстанавливаем исходный размер шрифта
-        }
-      }
-
-      // Сбрасываем тень
-      bufferCtx.shadowColor = 'transparent';
-      bufferCtx.shadowBlur = 0;
-      bufferCtx.shadowOffsetX = 0;
-      bufferCtx.shadowOffsetY = 0;
-
-      // Отрисовка временных меток
-      if (config.display.showTimeline) {
-        timeLabels.forEach((label, i) => {
-          const textWidth = bufferCtx.measureText(label).width;
-          const yPosition = config.display.showPriceChange 
-            ? bufferCanvas.height - bottomMargin + 50  // Если Price Change активен, рисуем над линией
-            : bufferCanvas.height - bottomMargin + 110; // Если Price Change неактивен, рисуем внизу
-          
-          // Рассчитываем позицию X с учетом выхода за границы
-          let xPosition = labelPositions[i] - textWidth / 2;
-          
-          // Проверяем, не выходит ли текст за левую границу
-          if (xPosition < leftMargin / 2) {
-            xPosition = leftMargin / 2;
-          }
-          
-          // Проверяем, не выходит ли текст за правую границу
-          if (xPosition + textWidth > bufferCanvas.width - rightMargin / 2) {
-            xPosition = bufferCanvas.width - rightMargin / 2 - textWidth;
-          }
-          
-          // Добавляем усиленную тень для лучшей читаемости
-          bufferCtx.save();
-          bufferCtx.shadowColor = 'black';
-          bufferCtx.shadowBlur = 6;
-          bufferCtx.shadowOffsetX = 2;
-          bufferCtx.shadowOffsetY = 2;
-          
-          // Сам текст временных меток
-          bufferCtx.fillStyle = config.font.color;
-          bufferCtx.fillText(label, xPosition, yPosition);
-          bufferCtx.restore();
-        });
-      }
-
-      // Отрисовка разделительной линии только если активны оба элемента
-      if (config.display.showTimeline && config.display.showPriceChange) {
-        bufferCtx.strokeStyle = 'yellow';
-        bufferCtx.lineWidth = 2;
-        bufferCtx.beginPath();
-        bufferCtx.moveTo(leftMargin / 2, bufferCanvas.height - bottomMargin + 97);
-        bufferCtx.lineTo(bufferCanvas.width - rightMargin / 2, bufferCanvas.height - bottomMargin + 97);
-        bufferCtx.stroke();
-      }
-
-      // Отрисовка изменений цены - делаем это в последнюю очередь, чтобы оно всегда было поверх всего
-      if (config.display.showPriceChange) {
-        const changeWidth = (bufferCanvas.width - leftMargin / 2 - rightMargin / 2) / changes.length;
-        
-        // Отрисовка текста price change с тенями вместо фона
-        changes.forEach((change, i) => {
-          const x = leftMargin / 2 + i * changeWidth + changeWidth / 2;
-          const text = `${change.period}: ${change.value >= 0 ? '+' : ''}${change.value.toFixed(2)}%`;
-          const textWidth = bufferCtx.measureText(text).width;
-          
-          // Рассчитываем позицию X с учетом выхода за границы
-          let xPosition = x - textWidth / 2;
-          
-          // Проверяем, не выходит ли текст за левую границу
-          if (xPosition < leftMargin / 2) {
-            xPosition = leftMargin / 2;
-          }
-          
-          // Проверяем, не выходит ли текст за правую границу
-          if (xPosition + textWidth > bufferCanvas.width - rightMargin / 2) {
-            xPosition = bufferCanvas.width - rightMargin / 2 - textWidth;
-          }
-          
-          // Добавляем усиленную тень для лучшей читаемости
-          bufferCtx.save();
-          bufferCtx.shadowColor = 'black';
-          bufferCtx.shadowBlur = 6;
-          bufferCtx.shadowOffsetX = 2;
-          bufferCtx.shadowOffsetY = 2;
-          
-          // Отрисовываем текст изменения цены
-          bufferCtx.fillStyle = change.value > 0 ? config.upBar.color : change.value < 0 ? config.downBar.color : 'yellow';
-          bufferCtx.fillText(text, xPosition, bufferCanvas.height - bottomMargin + 110);
-          bufferCtx.restore();
-        });
-      }
-
-      // Копируем содержимое буферного канваса на основной
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(bufferCanvas, 0, 0);
-
-    } finally {
-      isDrawingRef.current = false;
-    }
-  }, [chartData, config, chartTokenInfo, interval, indexToX, priceToY, tokenName]);
-
-  // Запускаем отрисовку при изменении данных
+  // Load overlay images lazily
   useEffect(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    animationFrameRef.current = requestAnimationFrame(drawChart);
-  }, [drawChart]);
-
-  useEffect(() => {
-    // Если нет данных и не превью, не рисуем график
-    if (!isPreview && (!data || data.length === 0)) {
-      setIsLoading(false);
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    // Вызываем отрисовку через requestAnimationFrame
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-    animationFrameRef.current = requestAnimationFrame(() => {
-      drawChart().then(() => {
-        setIsLoading(false);
-      }).catch(err => {
-        console.error('Error rendering chart:', err);
-        setError(err instanceof Error ? err.message : 'Error rendering chart');
-        setIsLoading(false);
-      });
+    if (!overlays) return;
+    const cache = imagesCacheRef.current;
+    overlays.forEach((item) => {
+      if (!cache.has(item.id)) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          item.naturalWidth = img.naturalWidth;
+          item.naturalHeight = img.naturalHeight;
+          drawOverlays();
+        };
+        img.src = item.url;
+        cache.set(item.id, img);
+      }
     });
-    
-  }, [config, data, tokenInfo, interval, width, height, drawChart, isPreview]);
+    // Cleanup missing
+    Array.from(cache.keys()).forEach((key) => {
+      if (!overlays.find(o => o.id === key)) {
+        cache.delete(key);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overlays]);
+
+  // Draw overlays on separate canvas
+  const drawOverlays = () => {
+    const oCanvas = overlayCanvasRef.current;
+    if (!oCanvas) return;
+    const ctx = oCanvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, oCanvas.width, oCanvas.height);
+    if (!overlays) return;
+    const cache = imagesCacheRef.current;
+    overlays.forEach((item) => {
+      const img = cache.get(item.id);
+      if (!img) return;
+      const iw = (item.naturalWidth || img.naturalWidth);
+      const ih = (item.naturalHeight || img.naturalHeight);
+      ctx.save();
+      ctx.translate(item.x, item.y);
+      // Mirror strictly in screen horizontal axis first
+      if (item.mirrored) {
+        ctx.scale(-1, 1);
+      }
+      // Then apply rotation (invert sign for mirrored so visual direction matches frame)
+      const rot = (item.rotation || 0);
+      ctx.rotate(item.mirrored ? -rot : rot);
+      const s = (item.scale || 1);
+      ctx.scale(s, s);
+      ctx.drawImage(img, -iw / 2, -ih / 2, iw, ih);
+      ctx.restore();
+
+      // If selected, draw bounding box and handles
+      if (selectedIdRef.current === item.id) {
+        // Compute transformed corners to screen to draw handles
+        const corners = [
+          { hx: -1, hy: -1 }, // tl
+          { hx: 1, hy: -1 },  // tr
+          { hx: -1, hy: 1 },  // bl
+          { hx: 1, hy: 1 },   // br
+        ].map(({ hx, hy }) => {
+          // Use absolute scale for handle positions so UI does not mirror
+          const sx = item.x + (Math.cos(item.rotation || 0) * hx * (iw / 2) - Math.sin(item.rotation || 0) * hy * (ih / 2)) * Math.abs(item.scale || 1);
+          const sy = item.y + (Math.sin(item.rotation || 0) * hx * (iw / 2) + Math.cos(item.rotation || 0) * hy * (ih / 2)) * Math.abs(item.scale || 1);
+          return { x: sx, y: sy };
+        });
+        // Draw bounding polyline
+        ctx.save();
+        ctx.strokeStyle = '#00E5FF';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(corners[0].x, corners[0].y);
+        ctx.lineTo(corners[1].x, corners[1].y);
+        ctx.lineTo(corners[3].x, corners[3].y);
+        ctx.lineTo(corners[2].x, corners[2].y);
+        ctx.closePath();
+        ctx.stroke();
+        // Handles: tl(delete), tr(rotate), bl(duplicate), br(scale), center(mirror)
+        const drawHandle = (p: { x: number; y: number }, icon: string, color: string) => {
+          const r = HANDLE_RADIUS;
+          // Background circle
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = HANDLE_STROKE;
+          ctx.stroke();
+
+          // Draw icon - larger and black, perfectly centered
+          ctx.fillStyle = '#000';
+          ctx.font = `bold ${HANDLE_FONT_PX}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          // Fine-tune vertical centering for better visual alignment
+          ctx.fillText(icon, p.x, p.y + 1);
+        };
+        drawHandle(corners[0], '×', '#ff5252'); // delete
+        drawHandle(corners[1], '↻', '#ffd740'); // rotate
+        drawHandle(corners[2], '⧉', '#69f0ae'); // duplicate
+        drawHandle(corners[3], '⤡', '#40c4ff'); // scale
+        // center mirror at bottom center, slightly below the image boundary
+        const bottomMid = {
+          x: (corners[2].x + corners[3].x) / 2,
+          y: (corners[2].y + corners[3].y) / 2,
+        };
+        const centerVec = {
+          x: bottomMid.x - item.x,
+          y: bottomMid.y - item.y,
+        };
+        const vecLen = Math.hypot(centerVec.x, centerVec.y) || 1;
+        const nx = centerVec.x / vecLen;
+        const ny = centerVec.y / vecLen;
+        // place slightly outside (below) the bottom edge
+        const extra = HANDLE_RADIUS + 6;
+        const mirrorPos = { x: bottomMid.x + nx * extra, y: bottomMid.y + ny * extra };
+        drawHandle(mirrorPos, '↔', '#b388ff');
+        ctx.restore();
+      }
+    });
+  };
+
+  // Redraw overlays when dependencies change
+  useEffect(() => {
+    drawOverlays();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height]);
+
+  // Hit testing helpers
+  const hitTest = (px: number, py: number) => {
+    if (!overlays) return { item: null as OverlayItem | null, hit: 'none' as 'none' | 'move' | 'scale' | 'rotate' | 'delete' | 'mirror' | 'duplicate' };
+    // iterate from top-most (last)
+    for (let i = overlays.length - 1; i >= 0; i--) {
+      const item = overlays[i];
+      const img = imagesCacheRef.current.get(item.id);
+      if (!img) continue;
+      const iw = (item.naturalWidth || img.naturalWidth);
+      const ih = (item.naturalHeight || img.naturalHeight);
+      // compute handle positions
+      const corners = [
+        { key: 'delete' as const, hx: -1, hy: -1 },
+        { key: 'rotate' as const, hx: 1, hy: -1 },
+        { key: 'duplicate' as const, hx: -1, hy: 1 },
+        { key: 'scale' as const, hx: 1, hy: 1 },
+      ].map(({ key, hx, hy }) => {
+        // Use absolute scale for handle positions so UI does not mirror
+        const sx = item.x + (Math.cos(item.rotation || 0) * hx * (iw / 2) - Math.sin(item.rotation || 0) * hy * (ih / 2)) * Math.abs(item.scale || 1);
+        const sy = item.y + (Math.sin(item.rotation || 0) * hx * (iw / 2) + Math.cos(item.rotation || 0) * hy * (ih / 2)) * Math.abs(item.scale || 1);
+        return { key, x: sx, y: sy };
+      });
+      // center mirror at bottom center with offset below the image boundary
+      const bottomMid = {
+        x: (corners[2].x + corners[3].x) / 2,
+        y: (corners[2].y + corners[3].y) / 2,
+      };
+      const centerVec = { x: bottomMid.x - item.x, y: bottomMid.y - item.y };
+      const vecLen = Math.hypot(centerVec.x, centerVec.y) || 1;
+      const nx = centerVec.x / vecLen;
+      const ny = centerVec.y / vecLen;
+      const extra = HANDLE_RADIUS + 6;
+      const mirror = { key: 'mirror' as const, x: bottomMid.x + nx * extra, y: bottomMid.y + ny * extra };
+      const inCircle = (cx: number, cy: number, r = HIT_RADIUS) => (px - cx) * (px - cx) + (py - cy) * (py - cy) <= r * r;
+      const handle = [...corners, mirror].find(h => inCircle(h.x, h.y));
+      if (handle) {
+        return { item, hit: handle.key };
+      }
+      // test body (convert to local space). Mirror must be undone in screen X before rotation.
+      let sx = px - item.x;
+      let sy = py - item.y;
+      if (item.mirrored) {
+        sx = -sx; // undo horizontal flip done before rotation
+      }
+      const cos = Math.cos(-(item.rotation || 0));
+      const sin = Math.sin(-(item.rotation || 0));
+      const lx = (cos * sx - sin * sy) / Math.abs(item.scale || 1);
+      const ly = (sin * sx + cos * sy) / Math.abs(item.scale || 1);
+      if (lx >= -iw / 2 && lx <= iw / 2 && ly >= -ih / 2 && ly <= ih / 2) {
+        return { item, hit: 'move' };
+      }
+    }
+    return { item: null, hit: 'none' };
+  };
+
+  // Pointer events
+  useEffect(() => {
+    const canvas = overlayCanvasRef.current;
+    if (!canvas) return;
+    const toCanvasCoords = (e: MouseEvent | TouchEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      let clientX: number; let clientY: number;
+      if (e instanceof TouchEvent) {
+        const t = e.touches[0] || e.changedTouches[0];
+        clientX = t.clientX; clientY = t.clientY;
+      } else {
+        clientX = (e as MouseEvent).clientX; clientY = (e as MouseEvent).clientY;
+      }
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+    };
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (!overlays) return;
+      // Clear any stale drag state to avoid previous tool interference
+      dragModeRef.current = 'none';
+      dragStartRef.current = null;
+      const { x, y } = toCanvasCoords(e);
+      const { item, hit } = hitTest(x, y);
+      if (!item || hit === 'none') {
+        selectedIdRef.current = null;
+        if (onSelectOverlay) onSelectOverlay(null);
+        drawOverlays();
+        return;
+      }
+      selectedIdRef.current = item.id;
+      if (onSelectOverlay) onSelectOverlay(item.id);
+      dragModeRef.current = hit === 'move' ? 'move' : hit === 'scale' ? 'scale' : hit === 'rotate' ? 'rotate' : 'none';
+      // For direct-action handles we do not initialize drag
+      if (dragModeRef.current !== 'none') {
+        dragStartRef.current = { x, y, item: { ...item } };
+      }
+      if (hit === 'delete') {
+        const next = overlays.filter(o => o.id !== item.id);
+        onOverlaysChange && onOverlaysChange(next);
+        selectedIdRef.current = null;
+        if (onSelectOverlay) onSelectOverlay(null);
+        dragModeRef.current = 'none';
+        drawOverlays();
+        e.preventDefault();
+        return;
+      } else if (hit === 'mirror') {
+        // toggle mirrored and commit immediately
+        const next = overlays.map(o => o.id === item.id ? { ...o, mirrored: !o.mirrored } : o);
+        onOverlaysChange && onOverlaysChange(next);
+        dragModeRef.current = 'none';
+        drawOverlays();
+        e.preventDefault();
+        return;
+      } else if (hit === 'duplicate') {
+        const copy: OverlayItem = { ...item, id: `${item.id}_copy_${Date.now()}`, x: item.x + 20, y: item.y + 20 };
+        onOverlaysChange && onOverlaysChange([...(overlays || []), copy]);
+        dragModeRef.current = 'none';
+        drawOverlays();
+        e.preventDefault();
+        return;
+      }
+      drawOverlays();
+      e.preventDefault();
+    };
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      if (!overlays) return;
+      if (!dragStartRef.current || dragModeRef.current === 'none') return;
+      const { x, y } = toCanvasCoords(e);
+      const start = dragStartRef.current;
+      const idx = overlays.findIndex(o => o.id === selectedIdRef.current);
+      if (idx < 0) return;
+      const current = overlays[idx];
+      if (dragModeRef.current === 'move') {
+        const dx = x - start.x; const dy = y - start.y;
+        const next = overlays.slice();
+        next[idx] = {
+          ...current,
+          mirrored: current.mirrored ?? start.item!.mirrored ?? false,
+          x: (start.item!.x + dx),
+          y: (start.item!.y + dy)
+        };
+        onOverlaysChange && onOverlaysChange(next);
+      } else if (dragModeRef.current === 'scale') {
+        const dx = x - current.x; const dy = y - current.y;
+        const dist = Math.hypot(dx, dy);
+        const sdx = start.x - current.x; const sdy = start.y - current.y;
+        const sdist = Math.hypot(sdx, sdy) || 1;
+        const factor = (dist / sdist);
+        const next = overlays.slice();
+        next[idx] = {
+          ...current,
+          mirrored: current.mirrored ?? start.item!.mirrored ?? false,
+          scale: Math.max(0.05, (start.item!.scale || 1) * factor)
+        };
+        onOverlaysChange && onOverlaysChange(next);
+      } else if (dragModeRef.current === 'rotate') {
+        // Rotation delta follows pointer; drawing logic handles mirrored visual direction
+        const angle = Math.atan2(y - current.y, x - current.x);
+        const sangle = Math.atan2(start.y - current.y, start.x - current.x);
+        const delta = angle - sangle;
+        const next = overlays.slice();
+        next[idx] = {
+          ...current,
+          mirrored: current.mirrored ?? start.item!.mirrored ?? false,
+          rotation: (start.item!.rotation || 0) + delta
+        };
+        onOverlaysChange && onOverlaysChange(next);
+      }
+      drawOverlays();
+      e.preventDefault();
+    };
+    const onUp = () => {
+      dragModeRef.current = 'none';
+      dragStartRef.current = null;
+      // ensure overlay redraw post interaction
+      drawOverlays();
+    };
+    canvas.addEventListener('mousedown', onDown);
+    canvas.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    canvas.addEventListener('touchstart', onDown, { passive: false } as any);
+    canvas.addEventListener('touchmove', onMove, { passive: false } as any);
+    window.addEventListener('touchend', onUp);
+    return () => {
+      canvas.removeEventListener('mousedown', onDown);
+      canvas.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      canvas.removeEventListener('touchstart', onDown as any);
+      canvas.removeEventListener('touchmove', onMove as any);
+      window.removeEventListener('touchend', onUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overlays, onOverlaysChange]);
 
   return (
-    <Box className="chart-preview">
+    <Box className="chart-preview" sx={{ position: 'relative', width: '100%', maxWidth: `${width}px` }}>
       {error && <div className="error">Error: {error}</div>}
       <canvas
         ref={canvasRef}
         id={id}
         width={width}
         height={height}
-        style={{ 
+        style={{ display: 'block', maxWidth: '100%', height: 'auto' }}
+      />
+      <canvas
+        ref={overlayCanvasRef}
+        width={width}
+        height={height}
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          pointerEvents: 'auto',
           display: 'block',
           maxWidth: '100%',
-          height: 'auto',
-          opacity: isLoading ? 0 : 1,
-          transition: 'opacity 0.3s ease-in-out'
+          height: 'auto'
         }}
+        onContextMenu={(e) => e.preventDefault()}
       />
-      {!isPreview && chartTokenInfo && showTokenInfo && (
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle1" gutterBottom>
-            Token Info:
-          </Typography>
-          <Typography>
-            Price: ${chartTokenInfo.priceUsd.toFixed(8)}
-          </Typography>
-          <Typography>
-            Market Cap: ${chartTokenInfo.marketCap.toLocaleString()}
-          </Typography>
-          <Typography>
-            Price Changes:
-          </Typography>
-          <Box sx={{ pl: 2 }}>
-            <Typography>5m: {chartTokenInfo.priceChange['5m']}%</Typography>
-            <Typography>1h: {chartTokenInfo.priceChange['1h']}%</Typography>
-            <Typography>6h: {chartTokenInfo.priceChange['6h']}%</Typography>
-            <Typography>24h: {chartTokenInfo.priceChange['24h']}%</Typography>
-          </Box>
-        </Box>
-      )}
     </Box>
   );
-};
+});
 
-export default ChartPreview; 
+export default ChartPreview;

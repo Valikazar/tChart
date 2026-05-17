@@ -1,153 +1,79 @@
-# Chart Constructor
+# Сервер конфигурации чарт-конструктора
 
-Tool for creating and configuring cryptocurrency charts.
+Серверное приложение на базе Express.js для управления конфигурациями чарт-конструктора. Сервер предоставляет API для получения, создания и обновления настроек визуализации чартов для разных групп.
 
-## Chart Generation
+## Структура проекта
 
-The library provides a flexible chart generation system using the standard Canvas API. The standard chart size is a square 1280x1280.
-
-## Components
-
-### ChartPreview Component
-
-The main component for rendering charts with full control over appearance and behavior:
-
-```tsx
-import ChartPreview from './components/ChartPreview';
-
-<ChartPreview
-  config={config}
-  data={data}
-  tokenInfo={tokenInfo}
-  interval="hour"
-  width={1280}
-  height={1280}
-  isPreview={false}
-/>
+```
+/
+├── server.js                    # Основной серверный скрипт
+├── build/                       # Директория со сборкой React-приложения
+│   ├── index.html               # Основной HTML-файл клиентского приложения
+│   ├── static/                  # Статические ресурсы приложения
+│   └── asset-manifest.json      # Манифест ресурсов
+└── bot/
+    └── groups/                  # Директория с конфигурациями групп
+        └── [groupId].json       # Файл конфигурации для конкретной группы
 ```
 
-### AdaptiveChartContainer Component
+## Функциональность
 
-A wrapper component that automatically adjusts the chart size to its container:
+### API
 
-```tsx
-import AdaptiveChartContainer from './components/AdaptiveChartContainer';
+Сервер предоставляет следующие API-эндпоинты:
 
-<AdaptiveChartContainer
-  config={config}
-  data={data}
-  tokenInfo={tokenInfo}
-  preserveAspectRatio={true} // Whether to maintain a 1:1 aspect ratio
-  minHeight={400} // Minimum container height
-  isPreview={false} // Whether to show preview mode
-/>
+| Эндпоинт | Метод | Описание |
+|----------|-------|----------|
+| `/api/config/:groupId` | GET | Получение конфигурации группы по ID и токену |
+| `/api/access-token` | POST | Создание временного токена доступа к конфигурации |
+| `/api/config/:groupId` | PUT | Обновление конфигурации группы |
+
+### Токены доступа
+
+Доступ к API защищен с помощью временных токенов:
+- Токены генерируются при запросе `/api/access-token`
+- Срок жизни токена: 1 час
+- Токены хранятся в памяти сервера (в реальном приложении рекомендуется использовать Redis или БД)
+
+### Обработка изображений
+
+Сервер обрабатывает изображения в конфигурациях:
+- Поддерживается передача изображений в формате base64
+- Автоматическая оптимизация размера конфигурации при превышении лимита (1 МБ)
+
+### CORS
+
+Настроена защита CORS для ограничения доступа:
+- Разрешенные источники: `http://localhost:3002`, `https://tchart.xyz`, `http://tchart.xyz`
+- Разрешенные методы: `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`
+
+## Запуск сервера
+
+```bash
+# Установка зависимостей
+npm install
+
+# Запуск сервера 
+node server.js
 ```
 
-### Data Format
+Сервер по умолчанию запускается на порту 3002. Порт можно изменить через переменную окружения `PORT`.
 
-Data must be in OHLCV format:
+## Формат конфигурации
 
-```json
-[
-  [timestamp, open, high, low, close, volume],
-  ...
-]
-```
+Конфигурация чарт-конструктора хранится в JSON-формате и может содержать следующие ключевые элементы:
 
-Or in object format:
+- `background` - настройки фона чарта
+- `upBar` - настройки восходящих баров
+- `downBar` - настройки нисходящих баров
+- `candle` - настройки свечей
+- `knife` - настройки ножей
 
-```json
-[
-  {
-    "timestamp": 1617235200,
-    "open": 100,
-    "high": 120,
-    "low": 90,
-    "close": 110,
-    "volume": 1000
-  },
-  ...
-]
-```
+Каждый элемент может содержать изображения в формате URL или base64.
 
-### Configuration Format
+## Требования
 
-Example structure of configuration:
-
-```json
-{
-  "background": {
-    "color": "#0C0E16",
-    "image": null
-  },
-  "font": {
-    "family": "Arial",
-    "size": 20,
-    "color": "#FFFFFF"
-  },
-  "upBar": {
-    "color": "#00FF00",
-    "lineColor": "#00FF00",
-    "lineWidth": 1,
-    "borderColor": "#22FF22",
-    "borderWidth": 1,
-    "borderStyle": "outside",
-    "body": null
-  },
-  "downBar": {
-    "color": "#FF0000",
-    "lineColor": "#FF0000",
-    "lineWidth": 1,
-    "borderColor": "#FF2222",
-    "borderWidth": 1,
-    "borderStyle": "outside",
-    "body": null
-  },
-  "display": {
-    "showTokenName": true,
-    "showMarketCap": true,
-    "showPrice": true,
-    "showPriceChange": false,
-    "showMinMax": true,
-    "showTimeline": true
-  }
-}
-```
-
-### Features
-
-1. Automatic scaling based on the number of bars and chart size
-2. Support for custom bar styles (colors, borders, images)
-3. Configurable display options (token name, market cap, price changes)
-4. Enhanced text readability with shadows
-5. Support for background images and overlays
-6. Timeline display with automatic formatting
-7. Price change indicators with color coding
-8. Adaptive sizing with aspect ratio preservation option
-
-### Technical Notes
-
-1. Uses standard browser Canvas API for rendering
-2. All chart components are fully configurable
-3. Supports both static and responsive layouts
-4. Optimized for performance with double buffering
-5. Handles window resize events automatically
-6. Supports both preview and full modes
-
-## New: Adaptive Charts
-
-The library now supports adaptive charts that automatically adjust to their container size, which significantly improves display across various devices and screen resolutions. Adaptive charts prevent overlapping with other UI elements (like accordions).
-
-### Improved Information Display
-
-* The current price and min/max prices are now displayed in the top right corner of the chart for better visibility
-* All text elements (timeline labels, price changes) have enhanced shadows instead of semi-transparent backgrounds, which significantly improves their readability when using background images
-* Price changes are always displayed on top of other chart elements, preventing them from being obscured by background images and overlays
-
-## Notes
-
-1. The library uses the standard browser Canvas API for rendering
-2. All chart components are fully configurable
-3. The same API works across all environments - no need to change your code
-4. The library is optimized for performance with double buffering
-5. All text elements have enhanced shadows for better readability 
+- Node.js 14+ 
+- Express.js
+- CORS
+- Файловый доступ для хранения конфигураций 

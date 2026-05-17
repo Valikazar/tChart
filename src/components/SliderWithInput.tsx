@@ -21,7 +21,7 @@ const SliderWithInput: React.FC<SliderWithInputProps> = ({
   const [inputValue, setInputValue] = useState(value.toString());
 
   useEffect(() => {
-    setInputValue(isFloat ? value.toFixed(2) : value.toString());
+    setInputValue(isFloat ? value.toFixed(3) : value.toString());
   }, [value, isFloat]);
 
   const handleSliderChange = (_: Event, newValue: number | number[]) => {
@@ -49,7 +49,7 @@ const SliderWithInput: React.FC<SliderWithInputProps> = ({
       onChange(max);
     } else {
       const roundedValue = isFloat ? numValue : Math.round(numValue);
-      setInputValue(isFloat ? roundedValue.toFixed(2) : roundedValue.toString());
+      setInputValue(isFloat ? roundedValue.toFixed(3) : roundedValue.toString());
       onChange(roundedValue);
     }
   };
@@ -70,12 +70,12 @@ const SliderWithInput: React.FC<SliderWithInputProps> = ({
         onBlur={handleBlur}
         size="small"
         type="number"
-        sx={{ minWidth: '80px' }}
+        sx={{ minWidth: '90px' }}
         inputProps={{
           step,
           min,
           max,
-          style: { width: '40px' }
+          style: { width: '60px' }
         }}
       />
     </Box>

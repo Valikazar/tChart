@@ -1,0 +1,36 @@
+# Bot configuration (содержит секретные токены)
+dc_config_bot.json
+
+# Virtual environment for Discord bot
+dc_venv/
+.dc_venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Chart files
+chart_*.png
+
+# Group configurations for Discord bot (могут содержать приватные данные)
+dc_groups/*.json
+!dc_groups/.gitkeep
+
+# Backup files for Discord bot
+dc_groups/.backup_*
+
+# Logs
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db 
