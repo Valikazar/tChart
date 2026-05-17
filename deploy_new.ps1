@@ -13,8 +13,8 @@ Write-Host "No duplication: jsbot/ uses parent dependencies" -ForegroundColor Ye
 Write-Host ""
 # Wrapper function to automatically send Return key to plink's "Access granted" prompts
 function plink {
-    # Pipe a newline to the real plink executable to auto-approve "Access granted. Press Return to begin session."
-    "" | & plink.exe @args
+    # Pipe a Carriage Return to the real plink executable to auto-approve "Access granted. Press Return to begin session."
+    echo "" | & plink.exe -batch @args
 }
 
 # Load environment variables from .env file if it exists
