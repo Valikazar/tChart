@@ -18,11 +18,8 @@ if (Test-Path ".env") {
         $name, $value = $_ -split '=', 2
         $name = $name.Trim()
         $value = $value.Trim()
-        # Strip potential quotes from env value
-        if ($value -match '^"(.*)"$' -or $value -match "^'(.*)'$") {
-            $value = $Matches[1]
-        }
-        $env:$name = $value
+        # Set environment variable dynamically
+        Set-Item -Path "env:$name" -Value $value
     }
 }
 
