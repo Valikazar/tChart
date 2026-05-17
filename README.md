@@ -1,79 +1,79 @@
-# Сервер конфигурации чарт-конструктора
+# Chart Constructor Configuration Server
 
-Серверное приложение на базе Express.js для управления конфигурациями чарт-конструктора. Сервер предоставляет API для получения, создания и обновления настроек визуализации чартов для разных групп.
+An Express.js-based server application for managing chart constructor configurations. The server provides an API to retrieve, create, and update chart visualization settings for different groups.
 
-## Структура проекта
+## Project Structure
 
 ```
 /
-├── server.js                    # Основной серверный скрипт
-├── build/                       # Директория со сборкой React-приложения
-│   ├── index.html               # Основной HTML-файл клиентского приложения
-│   ├── static/                  # Статические ресурсы приложения
-│   └── asset-manifest.json      # Манифест ресурсов
+├── server.js                    # Main server script
+├── build/                       # React application build directory
+│   ├── index.html               # Main client application HTML file
+│   ├── static/                  # Static application assets
+│   └── asset-manifest.json      # Resource manifest
 └── bot/
-    └── groups/                  # Директория с конфигурациями групп
-        └── [groupId].json       # Файл конфигурации для конкретной группы
+    └── groups/                  # Directory containing group configurations
+        └── [groupId].json       # Configuration file for a specific group
 ```
 
-## Функциональность
+## Features
 
 ### API
 
-Сервер предоставляет следующие API-эндпоинты:
+The server provides the following API endpoints:
 
-| Эндпоинт | Метод | Описание |
+| Endpoint | Method | Description |
 |----------|-------|----------|
-| `/api/config/:groupId` | GET | Получение конфигурации группы по ID и токену |
-| `/api/access-token` | POST | Создание временного токена доступа к конфигурации |
-| `/api/config/:groupId` | PUT | Обновление конфигурации группы |
+| `/api/config/:groupId` | GET | Retrieve group configuration by ID and token |
+| `/api/access-token` | POST | Generate a temporary access token for the configuration |
+| `/api/config/:groupId` | PUT | Update group configuration |
 
-### Токены доступа
+### Access Tokens
 
-Доступ к API защищен с помощью временных токенов:
-- Токены генерируются при запросе `/api/access-token`
-- Срок жизни токена: 1 час
-- Токены хранятся в памяти сервера (в реальном приложении рекомендуется использовать Redis или БД)
+API access is secured using temporary tokens:
+- Tokens are generated upon requesting `/api/access-token`
+- Token lifetime: 1 hour
+- Tokens are stored in server memory (for a production application, using Redis or a database is recommended)
 
-### Обработка изображений
+### Image Processing
 
-Сервер обрабатывает изображения в конфигурациях:
-- Поддерживается передача изображений в формате base64
-- Автоматическая оптимизация размера конфигурации при превышении лимита (1 МБ)
+The server handles images within configurations:
+- Supports passing images in base64 format
+- Automatically optimizes configuration size if it exceeds the limit (1 MB)
 
 ### CORS
 
-Настроена защита CORS для ограничения доступа:
-- Разрешенные источники: `http://localhost:3002`, `https://tchart.xyz`, `http://tchart.xyz`
-- Разрешенные методы: `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`
+CORS protection is configured to restrict access:
+- Allowed origins: `http://localhost:3002`, `https://tchart.xyz`, `http://tchart.xyz`
+- Allowed methods: `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`
 
-## Запуск сервера
+## Running the Server
 
 ```bash
-# Установка зависимостей
+# Install dependencies
 npm install
 
-# Запуск сервера 
+# Start the server
 node server.js
 ```
 
-Сервер по умолчанию запускается на порту 3002. Порт можно изменить через переменную окружения `PORT`.
+By default, the server runs on port 3002. The port can be customized via the `PORT` environment variable.
 
-## Формат конфигурации
+## Configuration Format
 
-Конфигурация чарт-конструктора хранится в JSON-формате и может содержать следующие ключевые элементы:
+The chart constructor configuration is stored in JSON format and can contain the following key elements:
 
-- `background` - настройки фона чарта
-- `upBar` - настройки восходящих баров
-- `downBar` - настройки нисходящих баров
-- `candle` - настройки свечей
-- `knife` - настройки ножей
+- `background` - chart background settings
+- `upBar` - bullish (upward) bar settings
+- `downBar` - bearish (downward) bar settings
+- `candle` - candlestick settings
+- `knife` - knife settings
 
-Каждый элемент может содержать изображения в формате URL или base64.
+Each element can contain images in either URL or base64 format.
 
-## Требования
+## Requirements
 
-- Node.js 14+ 
+- Node.js 14+
 - Express.js
 - CORS
-- Файловый доступ для хранения конфигураций 
+- File system access for storing configurations
