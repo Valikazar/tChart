@@ -24,8 +24,8 @@ if (Test-Path ".env") {
 }
 
 # Setting up connection parameters
-$serverIP = "23.94.168.19"
-$sshPort = "2022"
+$serverIP = if ($env:SERVER_IP) { $env:SERVER_IP } else { "45.39.60.243" }
+$sshPort = if ($env:SSH_PORT) { $env:SSH_PORT } else { "22" }
 $password = if ($env:SERVER_PASSWORD) { $env:SERVER_PASSWORD } else { "YOUR_SERVER_PASSWORD" }
 $chartRemoteDir = "/home/ubuntu/tchart"
 $serverRemoteDir = "/home/ubuntu/tchart_service"
