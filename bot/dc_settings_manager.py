@@ -244,12 +244,7 @@ class SettingsManager:
                             logger.info(f"Checking admin rights for user {user_id} in guild {guild_id}")
                             guild = self.bot.get_guild(guild_id)
                             if not guild:
-                                logger.warning(f"Guild {guild_id} not found, removing config file")
-                                try:
-                                    os.remove(config_path)
-                                    logger.info(f"Removed config file for non-existent guild {guild_id}")
-                                except Exception as del_e:
-                                    logger.error(f"Error deleting config file for guild {guild_id}: {del_e}")
+                                logger.warning(f"Guild {guild_id} not found in bot's memory cache, skipping")
                                 continue
                                 
                             member = guild.get_member(user_id)

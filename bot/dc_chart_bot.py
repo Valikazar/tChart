@@ -761,11 +761,36 @@ async def generate_chart_for_channel(channel, is_auto=True):
 async def settings_command(interaction: discord.Interaction):
     """Settings command for admins"""
     try:
+        # First, defer the response to prevent timeout
+        await interaction.response.defer(ephemeral=True)
+        
         user_id = interaction.user.id
+        
+        # Check if we are running inside a server (guild)
+        if interaction.guild_id:
+            guild = interaction.guild
+            member = interaction.user
+            # Check if the user is an admin, the owner, or a superuser
+            if member.guild_permissions.administrator or guild.owner_id == member.id or str(member.display_name) == SUPER_USER_ID or str(member.global_name) == SUPER_USER_ID:
+                guild_id = str(guild.id)
+                # Load or create default config if not exists
+                config = settings_manager.load_guild_config(guild_id)
+                if not config:
+                    settings_manager.create_default_config(guild_id, guild.name)
+                
+                embed = settings_manager.create_settings_embed(guild_id, interaction.user)
+                view = SettingsView(guild_id, interaction.user)
+                await interaction.followup.send(embed=embed, view=view, ephemeral=True)
+                return
+            else:
+                await interaction.followup.send("You don't have administrator rights on this server.", ephemeral=True)
+                return
+        
+        # If in DMs, scan admin guilds
         admin_guilds = settings_manager.get_user_admin_guilds(user_id)
         
         if not admin_guilds:
-            await interaction.response.send_message("You don't have administrator rights on any server.", ephemeral=True)
+            await interaction.followup.send("You don't have administrator rights on any server.", ephemeral=True)
             return
         
         # If user has only one server, show settings directly
@@ -773,7 +798,7 @@ async def settings_command(interaction: discord.Interaction):
             guild_id = admin_guilds[0]['id']
             embed = settings_manager.create_settings_embed(guild_id, interaction.user)
             view = SettingsView(guild_id, interaction.user)
-            await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+            await interaction.followup.send(embed=embed, view=view, ephemeral=True)
             return
         
         # If user has multiple servers, show server selection menu
@@ -784,11 +809,14 @@ async def settings_command(interaction: discord.Interaction):
         )
         
         view = ServerSelectionView(admin_guilds, interaction.user)
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        await interaction.followup.send(embed=embed, view=view, ephemeral=True)
         
     except Exception as e:
         logger.error(f"Error in settings command: {e}")
-        await interaction.response.send_message(f"An error occurred: {str(e)}", ephemeral=True)
+        try:
+            await interaction.followup.send(f"An error occurred: {str(e)}", ephemeral=True)
+        except:
+            pass
 
 class ServerSelectionView(discord.ui.View):
     """View for server selection with Select Menu"""
