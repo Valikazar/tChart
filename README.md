@@ -73,7 +73,7 @@ Each element can contain images in either URL or base64 format.
 
 ## Requirements
 
-- Node.js 14+
+- Node.js 18+ (20+ recommended)
 - Express.js
 - CORS
 - File system access for storing configurations
